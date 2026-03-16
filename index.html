@@ -20,6 +20,7 @@
     <button class="nt" onclick="showPage('yearly',this)">Yearly</button>
     <button class="nt" onclick="showPage('tickers',this)">Tickers</button>
     <button class="nt" onclick="showPage('projection',this)">Projection</button>
+
   </div>
   <div id="nav-badge" class="nav-badge">2026</div>
 </div>
@@ -41,10 +42,11 @@
 
   <div class="cards cards-5" id="trades-cards">
     <div class="card g"><div class="card-label">Total Premium</div><div class="card-val g" id="t-prem">—</div><div class="card-sub">Trade profit YTD</div></div>
-    <div class="card o"><div class="card-label">In Progress</div><div class="card-val o" id="t-active">—</div><div class="card-sub" id="t-active-sub">Active positions</div></div>
+    
     <div class="card b"><div class="card-label">Avg Capital / Trade</div><div class="card-val b" id="t-cap">—</div><div class="card-sub">Per trade deployed</div></div>
     <div class="card y"><div class="card-label">Weekly Income</div><div class="card-val y" id="t-weekly">—</div><div class="card-sub" id="t-weekly-sub">Avg weekly</div></div>
     <div class="card o"><div class="card-label">Total Trades</div><div class="card-val o" id="t-count">—</div><div class="card-sub"><span id="t-contracts" style="color:var(--o);font-weight:800">—</span> contracts</div></div>
+    <div class="card pu"><div class="card-label">Open Trades</div><div class="card-val pu" id="t-active">—</div><div class="card-sub" id="t-active-sub">In progress</div></div>
   </div>
 
   <!-- Composition — full width horizontal -->
@@ -590,9 +592,7 @@ function renderTrades() {
 
   
   const totalProfit = base.reduce((s,t)=>s+t.pf, 0);
-  const activeTrades  = base.filter(t=>t.rs==='In Progress');
-  const activeCount   = activeTrades.length;
-  const activeTickers = [...new Set(activeTrades.map(t=>t.sk))].sort();
+  const wheelPnl    = base.reduce((s,t)=>s+(t.wl||0), 0);
   const caps        = base.filter(t=>t.cp>0).map(t=>t.cp);
   const avgCap      = caps.length ? Math.round(caps.reduce((a,c)=>a+c,0)/caps.length) : 0;
   
@@ -605,14 +605,18 @@ function renderTrades() {
   const weeklyAvg = weekVals.length ? Math.round(weekVals.reduce((a,v)=>a+v,0)/weekVals.length) : 0;
 
   $('t-prem').textContent = fmt(totalProfit);
-  $('t-active').textContent = activeCount;
-  $('t-active-sub').textContent = activeCount ? activeTickers.join(', ') : 'No open positions';
+
   $('t-cap').textContent = fmt(avgCap);
   $('t-weekly').textContent = fmt(weeklyAvg);
   $('t-weekly-sub').textContent = `Avg over ${weekVals.length} expirations`;
   $('t-count').textContent = base.length;
   const totalContracts = base.filter(t => t.tp === 'Put' || t.tp === 'Call').reduce((s,t) => s + Math.floor(t.sh/100), 0);
   if ($('t-contracts')) $('t-contracts').textContent = totalContracts.toLocaleString();
+  const activeTrades  = allsumTrades.filter(t => t.rs === 'In Progress');
+  const activeCount   = activeTrades.length;
+  const activeTickers = [...new Set(activeTrades.map(t => t.sk))].sort();
+  $('t-active').textContent     = activeCount;
+  $('t-active-sub').textContent = activeCount ? activeTickers.join(', ') : 'None open';
   $('trades-sub').textContent = `${base.length} trades · ${tradesYear === 'all' ? 'all years' : tradesYear}`;
 
   
@@ -1454,6 +1458,76 @@ function showPage(name, btn) {
     if (name==='tickers')    renderTickers();
     if (name==='projection') renderProjection();
   }
+}
+
+function renderPositions() {
+  const open = allsumTrades.filter(t => t.rs === 'In Progress');
+
+  // ── Stat cards ──────────────────────────────────────────
+  const count   = open.length;
+  const capital = open.reduce((s,t) => s + (t.cp||0), 0);
+  const prem    = open.reduce((s,t) => s + (t.pm||0), 0);
+  const wl      = open.reduce((s,t) => s + (t.wl||0), 0);
+  const tickers = [...new Set(open.map(t=>t.sk))].sort();
+
+  $('op-count').textContent   = count;
+  $('op-tickers').textContent = tickers.join(', ') || 'None';
+  $('op-capital').textContent = fmt(capital);
+  $('op-prem').textContent    = fmt(prem);
+  $('op-wl').textContent      = fmtS(wl);
+  $('op-wl').className        = 'card-val ' + (wl >= 0 ? 'y' : 'p');
+
+  // ── Days to expiry helper ──────────────────────────────
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  function daysLeft(expStr) {
+    if (!expStr) return null;
+    // Try parsing "Jan 17 2025", "January 17 2025", "1/17/2025"
+    const d = new Date(expStr);
+    if (isNaN(d)) return null;
+    d.setHours(0,0,0,0);
+    return Math.round((d - today) / 86400000);
+  }
+
+  // ── Sort by expiry (soonest first, nulls last) ─────────
+  const sorted = open.slice().sort((a,b) => {
+    const da = daysLeft(a.ex), db = daysLeft(b.ex);
+    if (da === null && db === null) return 0;
+    if (da === null) return 1;
+    if (db === null) return -1;
+    return da - db;
+  });
+
+  const soonCount = sorted.filter(t => { const d = daysLeft(t.ex); return d !== null && d <= 7; }).length;
+  $('op-expiry-note').textContent = soonCount ? `⚠ ${soonCount} expiring within 7 days` : `${count} open position${count!==1?'s':''}`;
+  $('op-expiry-note').style.color = soonCount ? 'var(--o)' : 'var(--dim)';
+
+  // ── Table rows ─────────────────────────────────────────
+  $('op-body').innerHTML = sorted.map(t => {
+    const dl = daysLeft(t.ex);
+    const dlColor = dl === null ? 'var(--dim)' : dl <= 3 ? 'var(--p)' : dl <= 7 ? 'var(--o)' : dl <= 14 ? 'var(--y)' : 'var(--text)';
+    const dlText  = dl === null ? '—' : dl < 0 ? `<span style="color:var(--p)">+${Math.abs(dl)}d ago</span>` : dl === 0 ? '<span style="color:var(--p)">Today</span>' : `<span style="color:${dlColor}">${dl}d</span>`;
+    const wlVal   = t.wl || 0;
+    return `<tr>
+      <td><strong style="color:${tc(t.sk)}">${t.sk}</strong></td>
+      <td>${badge(t.tp)}</td>
+      <td class="r">$${t.st}</td>
+      <td class="r">${t.sh.toLocaleString()}</td>
+      <td class="dim">${t.op||'—'}</td>
+      <td class="dim">${t.ex||'—'}</td>
+      <td class="r">${dlText}</td>
+      <td class="r pos">${fmt(t.pm)}</td>
+      <td class="r" style="color:var(--p)">${t.cp ? fmt(t.cp) : '—'}</td>
+      <td class="r" style="color:${wlVal>=0?'var(--y)':'var(--p)'}">${fmtS(wlVal)}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Footer totals ──────────────────────────────────────
+  $('op-foot').innerHTML = `
+    <td colspan="7" style="font-size:10px;color:var(--dim)">Totals</td>
+    <td class="r pos">${fmt(prem)}</td>
+    <td class="r" style="color:var(--p)">${capital ? fmt(capital) : '—'}</td>
+    <td class="r" style="color:${wl>=0?'var(--y)':'var(--p)'}">${fmtS(wl)}</td>`;
 }
 
 function updateFooter(ts) {
