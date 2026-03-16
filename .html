@@ -1,1 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<title>Dividend Executive</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #050709;
+  --bg2:       #090d14;
+  --bg3:       #0e1520;
+  --border:    #1a2535;
+  --border2:   #243040;
+  --text:      #dce8f5;
+  --dim:       #5a7080;
+  --dim2:      #3a5060;
+  --g:  #00ff87;  --g2: #00cc6a;
+  --b:  #00d4ff;  --b2: #00a8cc;
+  --p:  #ff2d87;  --p2: #cc2266;
+  --y:  #ffe600;  --y2: #ccb800;
+  --o:  #ff7b00;  --o2: #cc6200;
+  --pu: #b44dff;  --pu2:#8833cc;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; overflow-x: hidden; }
 
+/* ── BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,212,255,.05) 0%, transparent 70%);
+  top: -100px; right: -100px; z-index: 0; pointer-events: none;
+  animation: orb 12s ease-in-out infinite alternate;
+}
+@keyframes orb { from{transform:translate(0,0)} to{transform:translate(-60px,80px)} }
+
+/* ── NAV ── */
+#nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  background: rgba(5,7,9,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-size: 15px; font-weight: 900; letter-spacing: .1em; color: var(--g); text-transform: uppercase; }
+.nav-tabs { display: flex; gap: 2px; }
+.nt {
+  padding: 6px 16px; background: none; border: none; cursor: pointer;
+  font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+  border-radius: 6px; transition: all .15s;
+}
+.nt:hover { color: var(--text); background: var(--bg3); }
+.nt.active { color: var(--g); background: rgba(0,255,135,.08); border-bottom: 2px solid var(--g); border-radius: 6px 6px 0 0; }
+.nav-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: var(--g); background: rgba(0,255,135,.1);
+  border: 1px solid rgba(0,255,135,.2); border-radius: 20px;
+  padding: 4px 12px;
+}
+
+/* ── LAYOUT ── */
+.page { display: none; padding: 32px 28px 60px; position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── PAGE HEADER ── */
+.ph { margin-bottom: 28px; }
+.ph-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.ph-title { font-size: 38px; font-weight: 900; letter-spacing: -.02em; line-height: 1; }
+.ph-sub { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+
+/* ── STAT CARDS ── */
+.cards { display: grid; gap: 16px; margin-bottom: 24px; }
+.cards-4 { grid-template-columns: repeat(4, 1fr); }
+.cards-5 { grid-template-columns: repeat(5, 1fr); }
+.cards-3 { grid-template-columns: repeat(3, 1fr); }
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.card.g::before { background: linear-gradient(90deg, var(--g), transparent); }
+.card.b::before { background: linear-gradient(90deg, var(--b), transparent); }
+.card.p::before { background: linear-gradient(90deg, var(--p), transparent); }
+.card.y::before { background: linear-gradient(90deg, var(--y), transparent); }
+.card.o::before { background: linear-gradient(90deg, var(--o), transparent); }
+.card.pu::before { background: linear-gradient(90deg, var(--pu), transparent); }
+.card-label { font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.card-val { font-size: 28px; font-weight: 900; line-height: 1; }
+.card-val.g { color: var(--g); } .card-val.b { color: var(--b); }
+.card-val.p { color: var(--p); } .card-val.y { color: var(--y); }
+.card-val.o { color: var(--o); } .card-val.pu { color: var(--pu); }
+.card-sub { font-size: 11px; color: var(--dim); margin-top: 6px; }
+
+/* ── PANELS ── */
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+}
+.panel-title { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 8px; }
+.panel-title em { color: var(--g); font-style: normal; font-size: 12px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+/* ── FILTER BUTTONS ── */
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.fb {
+  padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border2);
+  background: none; cursor: pointer;
+  font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--dim);
+  transition: all .15s;
+}
+.fb:hover { border-color: var(--g); color: var(--g); }
+.fb.active { border-color: var(--g); color: var(--g); background: rgba(0,255,135,.08); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 10px 14px; text-align: left;
+  font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--dim); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+th.r, td.r { text-align: right; }
+td {
+  padding: 10px 14px; font-size: 12px;
+  border-bottom: 1px solid rgba(26,37,53,.6);
+  white-space: nowrap;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(0,212,255,.03); }
+.pos { color: var(--g); } .neg { color: var(--p); } .dim { color: var(--dim); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+}
+.badge-put  { background: rgba(0,212,255,.12); color: var(--b); border: 1px solid rgba(0,212,255,.2); }
+.badge-call { background: rgba(255,230,0,.1);  color: var(--y); border: 1px solid rgba(255,230,0,.2); }
+.badge-expired     { background: rgba(0,255,135,.08); color: var(--g);  border: 1px solid rgba(0,255,135,.15); }
+.badge-assigned    { background: rgba(255,45,135,.1); color: var(--p);  border: 1px solid rgba(255,45,135,.2); }
+.badge-rolled      { background: rgba(180,77,255,.1); color: var(--pu); border: 1px solid rgba(180,77,255,.2); }
+.badge-boughtback  { background: rgba(90,112,128,.1); color: var(--dim); border: 1px solid var(--border2); }
+.badge-inprogress  { background: rgba(255,123,0,.1);  color: var(--o);  border: 1px solid rgba(255,123,0,.2); }
+
+/* ── DONUT ── */
+.donut-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+.donut-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-val { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1; }
+.donut-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin-top: 2px; }
+.donut-row { display: flex; align-items: center; gap: 24px; padding: 20px; }
+.legend-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.legend-key { font-size: 12px; color: var(--dim); flex: 1; }
+.legend-val { font-size: 12px; font-weight: 700; }
+
+/* ── STAT STRIP ── */
+.stat-strip { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--border); }
+.stat-cell { padding: 16px 20px; }
+.stat-cell + .stat-cell { border-left: 1px solid var(--border); }
+.stat-cell-label { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.stat-cell-val { font-size: 22px; font-weight: 900; line-height: 1; }
+
+/* ── HEAT MAP ── */
+.heat-grid { display: grid; grid-template-columns: 60px repeat(12,1fr); gap: 3px; padding: 20px; }
+.heat-cell {
+  height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.heat-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--dim); display: flex; align-items: center; }
+.heat-month { font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── FOOTER ── */
+#footer { text-align: center; padding: 20px; font-size: 11px; color: var(--dim2); position: relative; z-index: 1; border-top: 1px solid var(--border); }
+
+/* ── YEAR BADGE TOP-RIGHT ── */
+.year-badge { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:var(--g); background:rgba(0,255,135,.1); border:1px solid rgba(0,255,135,.2); border-radius:20px; padding:4px 12px; }
+
+/* ── RESPONSIVE: TABLET (≤900px) ── */
+@media(max-width:900px) {
+  .cards-4, .cards-5 { grid-template-columns: repeat(2,1fr); }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .page { padding: 24px 16px 48px; }
+  #nav { padding: 0 16px; }
+  .ph-title { font-size: 30px; }
+  .stat-strip { grid-template-columns: repeat(2,1fr); }
+  .stat-cell:nth-child(odd) { border-left: none; }
+  .stat-cell:nth-child(3), .stat-cell:nth-child(4) { border-top: 1px solid var(--border); }
+}
+
+/* ── RESPONSIVE: MOBILE (≤600px) ── */
+@media(max-width:600px) {
+  /* Nav — logo hidden, tabs scroll horizontally */
+  #nav { padding: 0 12px; height: auto; min-height: 48px; flex-wrap: wrap; gap: 0; }
+  .logo { display: none; }
+  .nav-tabs {
+    order: 1; width: 100%;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding: 6px 0; gap: 2px;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nt { padding: 6px 12px; font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+  #nav-badge { order: 0; margin-left: auto; font-size: 9px; padding: 3px 8px; }
+
+  /* Page */
+  .page { padding: 16px 12px 40px; }
+  .ph { margin-bottom: 18px; }
+  .ph-title { font-size: 26px; }
+  .ph-sub { font-size: 10px; }
+  .ph-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  /* Stat cards — 2 col on mobile, 1 col for 5-card rows */
+  .cards-4 { grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .cards-5 { grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .card { padding: 14px; }
+  .card-val { font-size: 22px; }
+  .card-label { font-size: 8px; }
+  .card-sub { font-size: 10px; }
+
+  /* Panels */
+  .panel-head { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .panel-title { font-size: 9px; }
+  .two-col, .three-col { gap: 12px; }
+
+  /* Stat strip — 2 col */
+  .stat-strip { grid-template-columns: repeat(2,1fr); }
+  .stat-cell { padding: 12px 14px; }
+  .stat-cell:nth-child(odd) { border-left: none; }
+  .stat-cell:nth-child(3), .stat-cell:nth-child(4) { border-top: 1px solid var(--border); }
+  .stat-cell-val { font-size: 18px; }
+  .stat-cell-label { font-size: 8px; }
+
+  /* Filters — wrap and smaller */
+  .filters { gap: 4px; }
+  .fb { padding: 4px 10px; font-size: 9px; }
+
+  /* Tables — horizontal scroll */
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 540px; }
+  th, td { padding: 8px 10px; font-size: 11px; }
+
+  /* Charts — reduce heights on mobile */
+  #tw-bars { height: 180px !important; }
+  #m-bars  { height: 180px !important; }
+  #yoy-bars{ height: 200px !important; }
+  #proj-line { height: 200px !important; }
+  #ret-dist { font-size: 10px; }
+
+  /* Composition panel — stack vertically */
+  .donut-wrap { width: 110px; height: 110px; }
+  #d-legend { grid-template-columns: repeat(2,1fr) !important; gap: 6px 12px !important; }
+
+  /* Scenario cards on projection — stack */
+  #scenario-cards { grid-template-columns: 1fr !important; }
+
+  /* Result distribution on yearly — 2 col */
+  #result-bars { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* YoY chart legend — wrap */
+  #yoy-legend { flex-wrap: wrap; gap: 8px !important; }
+
+  /* Ticker filter — scroll */
+  #trades-ticker-filter { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  #trades-ticker-filter::-webkit-scrollbar { display: none; }
+
+  /* Hold duration / trade quality panels */
+  .three-col > .panel { min-width: 0; }
+}
+
+/* ── RESPONSIVE: SMALL MOBILE (≤380px) ── */
+@media(max-width:380px) {
+  .cards-4, .cards-5 { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card-val { font-size: 18px; }
+  .ph-title { font-size: 22px; }
+  .nt { padding: 5px 10px; font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <div class="logo">Dividend Executive</div>
+  <div class="nav-tabs">
+    <button class="nt active" onclick="showPage('trades',this)">Trades</button>
+    <button class="nt" onclick="showPage('monthly',this)">Monthly</button>
+    <button class="nt" onclick="showPage('yearly',this)">Yearly</button>
+    <button class="nt" onclick="showPage('tickers',this)">Tickers</button>
+    <button class="nt" onclick="showPage('projection',this)">Projection</button>
+  </div>
+  <div id="nav-badge" class="nav-badge">2026</div>
+</div>
+
+<!-- ════════════════════════════════ TRADES ════════════════════════════════ -->
+<div id="page-trades" class="page active">
+  <div class="ph">
+    <div class="ph-row">
+      <div>
+        <div class="ph-title" style="background:linear-gradient(120deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Trade Log</div>
+        <div class="ph-sub" id="trades-sub">Loading…</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Year</span>
+        <div class="filters" id="trades-year-filter"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards cards-5" id="trades-cards">
+    <div class="card g"><div class="card-label">Total Premium</div><div class="card-val g" id="t-prem">—</div><div class="card-sub">Trade profit YTD</div></div>
+    <div class="card p"><div class="card-label">Wheel P&L</div><div class="card-val p" id="t-wheel">—</div><div class="card-sub">Net incl. cap gains</div></div>
+    <div class="card b"><div class="card-label">Avg Capital / Trade</div><div class="card-val b" id="t-cap">—</div><div class="card-sub">Per trade deployed</div></div>
+    <div class="card y"><div class="card-label">Weekly Income</div><div class="card-val y" id="t-weekly">—</div><div class="card-sub" id="t-weekly-sub">Avg weekly</div></div>
+    <div class="card o"><div class="card-label">Total Trades</div><div class="card-val o" id="t-count">—</div><div class="card-sub"><span id="t-contracts" style="color:var(--o);font-weight:800">—</span> contracts</div></div>
+  </div>
+
+  <!-- Composition — full width horizontal -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Composition</div></div>
+    <div style="display:flex;align-items:center;gap:32px;padding:20px 28px">
+      <div class="donut-wrap" style="width:140px;height:140px;flex-shrink:0">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="36" fill="none" stroke="var(--border)" stroke-width="13"/>
+          <circle cx="50" cy="50" r="36" fill="none" stroke="var(--b)" stroke-width="13" stroke-dasharray="0 226" stroke-linecap="round" id="d-put"/>
+          <circle cx="50" cy="50" r="36" fill="none" stroke="var(--y)" stroke-width="13" stroke-dasharray="0 226" stroke-linecap="round" id="d-call"/>
+        </svg>
+        <div class="donut-center"><div class="donut-val" id="d-count">—</div><div class="donut-lbl">Trades</div></div>
+      </div>
+      <div id="d-legend" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px 32px;flex:1"></div>
+    </div>
+  </div>
+
+  <!-- Booked Premium — full width -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-head">
+      <div class="panel-title"><em>◈</em>Booked Premium by Week</div>
+      <div class="filters" id="trades-week-year"></div>
+    </div>
+    <div class="stat-strip" id="tw-stats"></div>
+    <div style="padding:16px 20px 6px"><div id="tw-bars" style="width:100%;height:240px"></div></div>
+    <div id="tw-legend" style="display:flex;gap:10px;flex-wrap:wrap;padding:6px 20px 16px"></div>
+  </div>
+
+  <!-- Analytics row: 3 panels -->
+  <div class="three-col" style="margin-bottom:20px">
+
+    <!-- Win Rate & P&L Quality -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title"><em>◈</em>Trade Quality</div></div>
+      <div style="padding:20px">
+        <div style="display:flex;gap:16px;margin-bottom:20px">
+          <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">Win Rate</div>
+            <div style="font-size:32px;font-weight:900;color:var(--g)" id="tq-winrate">—</div>
+          </div>
+          <div style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">Trades</div>
+            <div style="font-size:32px;font-weight:900;color:var(--b)" id="tq-total">—</div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;margin-bottom:5px">
+            <span style="color:var(--g)">Winners</span><span id="tq-win-count" style="color:var(--g)">—</span>
+          </div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">
+            <div id="tq-win-bar" style="height:100%;width:0%;background:var(--g);border-radius:4px;transition:width .6s"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;margin-bottom:5px">
+            <span style="color:var(--p)">Losers</span><span id="tq-loss-count" style="color:var(--p)">—</span>
+          </div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">
+            <div id="tq-loss-bar" style="height:100%;width:0%;background:var(--p);border-radius:4px;transition:width .6s"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          <div style="background:var(--bg3);border:1px solid rgba(0,255,135,.15);border-radius:6px;padding:10px">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:3px">Avg Win</div>
+            <div style="font-size:15px;font-weight:900;color:var(--g)" id="tq-avg-win">—</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid rgba(255,45,135,.15);border-radius:6px;padding:10px">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:3px">Avg Loss</div>
+            <div style="font-size:15px;font-weight:900;color:var(--p)" id="tq-avg-loss">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Return Distribution -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title"><em>◈</em>Return Distribution</div></div>
+      <div style="padding:20px">
+        <div id="ret-dist" style="width:100%;"></div>
+      </div>
+    </div>
+
+    <!-- Hold Duration -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title"><em>◈</em>Hold Duration</div></div>
+      <div style="padding:20px">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px">
+          <div style="font-size:36px;font-weight:900;color:var(--b)" id="hd-avg">—</div>
+          <div style="font-size:12px;color:var(--dim)">avg days held</div>
+        </div>
+        <div id="hold-dist" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title"><em>◈</em>All Trades</div>
+      <div class="filters" id="trades-ticker-filter"></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Stock</th><th>Open</th><th>Exp</th><th class="r">Shares</th><th class="r">Strike</th>
+          <th>Type</th><th class="r">Premium</th><th class="r">Cost</th><th class="r">Profit</th>
+          <th class="r">Capital</th><th class="r">% Ret</th><th>Result</th>
+        </tr></thead>
+        <tfoot id="trades-foot"></tfoot>
+        <tbody id="trades-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ MONTHLY ════════════════════════════════ -->
+<div id="page-monthly" class="page">
+  <div class="ph">
+    <div class="ph-row">
+      <div>
+        <div class="ph-title" style="background:linear-gradient(120deg,var(--b),var(--pu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Monthly</div>
+        <div class="ph-sub" id="monthly-sub">Premium by month</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Year</span>
+        <div class="filters" id="monthly-year-filter"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card g"><div class="card-label">Best Month</div><div class="card-val g" id="m-best">—</div><div class="card-sub" id="m-best-sub">Peak premium</div></div>
+    <div class="card b"><div class="card-label">Monthly Avg</div><div class="card-val b" id="m-avg">—</div><div class="card-sub">Avg per month</div></div>
+    <div class="card y"><div class="card-label">Total Profit</div><div class="card-val y" id="m-total">—</div><div class="card-sub">All months combined</div></div>
+    <div class="card pu"><div class="card-label">Active Months</div><div class="card-val pu" id="m-months">—</div><div class="card-sub">With trades</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Monthly Premium Breakdown</div></div>
+    <div class="stat-strip" id="m-stat-strip" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div style="padding:16px 20px 6px"><div id="m-bars" style="width:100%;height:220px"></div></div>
+    <div id="m-legend" style="display:flex;gap:10px;flex-wrap:wrap;padding:6px 20px 16px"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Month-by-Month Summary</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th><th class="r">Trades</th><th class="r">Puts</th><th class="r">Calls</th>
+          <th class="r">Premium</th><th class="r">Profit</th><th class="r">Avg/Trade</th>
+          <th class="r">Expired</th><th class="r">Assigned</th><th class="r">Rolled</th>
+        </tr></thead>
+        <tbody id="monthly-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ YEARLY ════════════════════════════════ -->
+<div id="page-yearly" class="page">
+  <div class="ph">
+    <div class="ph-title" style="background:linear-gradient(120deg,var(--y),var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Yearly</div>
+    <div class="ph-sub">Year-over-year performance</div>
+  </div>
+
+  <div class="cards cards-4" id="yearly-cards">
+    <div class="card g"><div class="card-label">2026 YTD</div><div class="card-val g" id="yr-2026">—</div><div class="card-sub" id="yr-2026-sub">—</div></div>
+    <div class="card b"><div class="card-label">Run Rate</div><div class="card-val b" id="yr-rate">—</div><div class="card-sub">Annualized at current pace</div></div>
+    <div class="card y"><div class="card-label">Best Month Ever</div><div class="card-val y" id="yr-best">—</div><div class="card-sub" id="yr-best-sub">—</div></div>
+    <div class="card pu"><div class="card-label">Total All-Time</div><div class="card-val pu" id="yr-total">—</div><div class="card-sub" id="yr-total-sub">—</div></div>
+  </div>
+
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-head">
+      <div class="panel-title"><em>◈</em>Year-over-Year by Month</div>
+      <div id="yoy-legend" style="display:flex;gap:16px;padding:0"></div>
+    </div>
+    <div style="padding:16px 20px 6px"><div id="yoy-bars" style="width:100%;height:280px"></div></div>
+  </div>
+
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Result Distribution</div></div>
+    <div id="result-bars" style="padding:20px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>YoY Monthly Table</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th>
+          <th class="r" id="yoy-col-2024">2024</th>
+          <th class="r" id="yoy-col-2025">2025</th>
+          <th class="r" id="yoy-col-2026">2026</th>
+          <th class="r">Δ YoY</th>
+        </tr></thead>
+        <tbody id="yoy-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ TICKERS ════════════════════════════════ -->
+<div id="page-tickers" class="page">
+  <div class="ph">
+    <div class="ph-title" style="background:linear-gradient(120deg,var(--p),var(--pu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Tickers</div>
+    <div class="ph-sub">Per-symbol performance breakdown</div>
+  </div>
+
+  <div class="cards cards-4">
+    <div class="card g"><div class="card-label">Top Earner</div><div class="card-val g" id="tk-top">—</div><div class="card-sub" id="tk-top-sub">—</div></div>
+    <div class="card b"><div class="card-label">Most Active</div><div class="card-val b" id="tk-active">—</div><div class="card-sub" id="tk-active-sub">—</div></div>
+    <div class="card p"><div class="card-label">Best % Return</div><div class="card-val p" id="tk-ret">—</div><div class="card-sub" id="tk-ret-sub">—</div></div>
+    <div class="card y"><div class="card-label">Tickers Traded</div><div class="card-val y" id="tk-count">—</div><div class="card-sub">Unique symbols</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Premium by Ticker</div></div>
+    <div style="padding:20px"><div id="ticker-bars" style="width:100%;height:220px"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>Ticker Summary</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Ticker</th><th class="r">Trades</th><th class="r">Puts</th><th class="r">Calls</th>
+          <th class="r">Premium</th><th class="r">Profit</th><th class="r">Avg/Trade</th>
+          <th class="r">Avg % Ret</th><th class="r">Win Rate</th><th>Top Result</th>
+        </tr></thead>
+        <tbody id="tickers-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ PROJECTION ════════════════════════════════ -->
+<div id="page-projection" class="page">
+  <div class="ph">
+    <div class="ph-row">
+      <div>
+        <div class="ph-title" style="background:linear-gradient(120deg,var(--g),var(--y));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Projection</div>
+        <div class="ph-sub">Weighted multi-year average model · trade history · auto-smooths as years accumulate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context strip: where we've been -->
+  <div class="cards cards-4" style="margin-bottom:16px">
+    <div class="card b"><div class="card-label">2024 Full Year</div><div class="card-val b" id="proj-y24">—</div><div class="card-sub" id="proj-y24-sub">12 months · baseline year</div></div>
+    <div class="card g"><div class="card-label">2025 Full Year</div><div class="card-val g" id="proj-y25">—</div><div class="card-sub" id="proj-y25-sub">best full year</div></div>
+    <div class="card y"><div class="card-label">2026 YTD</div><div class="card-val y" id="proj-ytd">—</div><div class="card-sub" id="proj-ytd-sub">vs 2025 same period</div></div>
+    <div class="card pu"><div class="card-label">Weighted Avg Baseline</div><div class="card-val pu" id="proj-wb">—</div><div class="card-sub" id="proj-wb-sub">weighted avg baseline</div></div>
+  </div>
+
+  <!-- Scenario cards -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px" id="scenario-cards">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Trajectory chart — all 3 scenarios -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-head">
+      <div class="panel-title"><em>◈</em>Income Trajectory · Actual + 3 Scenarios</div>
+      <div style="display:flex;gap:16px;align-items:center" id="proj-chart-legend"></div>
+    </div>
+    <div style="padding:16px 20px 6px"><div id="proj-line" style="width:100%;height:280px"></div></div>
+  </div>
+
+  <!-- Milestone tracker + assumptions side by side -->
+  <div class="two-col" style="margin-bottom:20px">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title"><em>◈</em>Monthly Income Milestones</div></div>
+      <div id="proj-milestones" style="padding:20px"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title"><em>◈</em>Model Assumptions</div></div>
+      <div id="proj-assumptions" style="padding:20px"></div>
+    </div>
+  </div>
+
+  <!-- Monthly breakdown table — all 3 scenarios -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title"><em>◈</em>2026 Monthly Targets by Scenario</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th>
+          <th class="r">2025 Actual</th>
+          <th class="r" style="color:var(--dim)">Conservative</th>
+          <th class="r" style="color:var(--b)">Base</th>
+          <th class="r" style="color:var(--g)">Optimistic</th>
+          <th class="r">2026 Actual</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody id="proj-body"></tbody>
+        <tfoot id="proj-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="footer">DIVIDEND EXECUTIVE · <span id="footer-year">2026</span> · <span id="footer-sync">—</span></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// DASHBOARD TEMPLATE — SETUP INSTRUCTIONS
+// ════════════════════════════════════════════════════════════════
+// 1. TRADE DATA — Replace the empty minisumTrades array below with
+//    your trades. Each trade needs these fields:
+//      stock, open, exp, shares, strike, type (Put/Call/trade),
+//      prem, cost, profit, capital, ret, result, wheel, year, week
+//
+// 2. HOOD TAB CONSTANTS — Search for "TODO" to find the 7 values
+//    you need to set for the HOOD cost basis tracker:
+//      assignCost, totalCapAll, premAll, prem26, shares,
+//      basisAll, basis26
+//    Also set ODD_SHARES, ODD_BASIS, WEEKLY_RATE in the projection.
+//
+// 3. TICKER COLORS — Add any new tickers to TICKER_COLORS below.
+//
+// 4. YEAR TOTALS — If you have prior year totals not in trade data,
+//    update y24total and y25total in renderProjection().
+// ════════════════════════════════════════════════════════════════
+
+
+// ===== DATA =====
+// [START:minisumTrades]
+const minisumTrades = [];
+// [END:minisumTrades]
+
+// [START:allsumTrades]
+const allsumTrades = [];
+// [END:allsumTrades]
+
+// ════════════════════════════════ HELPERS ════════════════════════════════
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const NEON   = ['#00d4ff','#ff2d87','#b44dff','#ff7b00','#00ff87','#ff6b6b','#00ffcc','#ff00aa','#00aaff','#ffaa00','#aa00ff','#40e0ff'];
+const TICKER_COLORS = {
+  HOOD: '#00d4ff',   // cyan
+  MSTX: '#ff2d87',   // hot pink
+  TSLL: '#00ff87',   // neon green
+  MARA: '#b44dff',   // purple
+  CLSK: '#ff7b00',   // orange
+  ETHU: '#ff7b00',   // orange  — was sky blue, changed: 2026 active, was too close to HOOD/SOXL
+  RIVN: '#00ffcc',   // teal
+  MSTU: '#ff6b6b',   // coral red
+  RIOT: '#aa00ff',   // deep violet
+  SOXL: '#ffe600',   // yellow  — was steel blue, changed: 2026 active, was too close to HOOD/ETHU
+  EOSE: '#ffaa00',   // amber
+  TQQQ: '#ff00aa',   // magenta
+  ROBN: '#c8ff40',   // lime
+  NVDL: '#40c8ff',   // light blue
+  SOFI: '#ff8040',   // peach
+};
+function tc(tk) { return TICKER_COLORS[tk] || NEON[Object.keys(TICKER_COLORS).length % NEON.length]; }
+
+const $ = id => document.getElementById(id);
+const $set = (id, attr, val) => { const el = $(id); if (el) el.setAttribute(attr, val); };
+const $text = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+const $html = (id, val) => { const el = $(id); if (el) el.innerHTML = val; };
+const fmt  = n => '$' + Math.abs(Math.round(n)).toLocaleString();
+const fmtS = n => (n < 0 ? '−' : '') + '$' + Math.abs(Math.round(n)).toLocaleString();
+const MONTH_LONG_TO_SHORT = {January:'Jan',February:'Feb',March:'Mar',April:'Apr',May:'May',June:'Jun',July:'Jul',August:'Aug',September:'Sep',October:'Oct',November:'Nov',December:'Dec'};
+const MONTHS_NUM = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+const mon = e => {
+  if (!e) return '';
+  const first = e.split(' ')[0];
+  // Long form "January 2" → "Jan"
+  if (MONTH_LONG_TO_SHORT[first]) return MONTH_LONG_TO_SHORT[first];
+  // Already short "Jan 5" → "Jan"
+  if (MONTHS_NUM[first] !== undefined) return first;
+  // Numeric "1/5/2024" → "Jan"
+  const m = String(e).match(/^(\d{1,2})\//);
+  return m ? MONTHS[parseInt(m[1]) - 1] : '';
+};
+
+function badge(type) {
+  const map = {
+    Put:'badge-put',Call:'badge-call',
+    Expired:'badge-expired',Assigned:'badge-assigned',
+    Rolled:'badge-rolled','Bought Back':'badge-boughtback','In Progress':'badge-inprogress'
+  };
+  return `<span class="badge ${map[type]||'badge-boughtback'}">${type}</span>`;
+}
+
+function svgBars(containerId, data, opts = {}) {
+  // data: [{label, val, color, sublabel?}]
+  const wrap = $(containerId);
+  if (!wrap || !data.length) return;
+  const W = wrap.clientWidth || 640;
+  const H = opts.height || 200;
+  const padL = opts.padL ?? 44, padR = opts.padR ?? 20, padT = 28, padB = 32;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const maxV = Math.max(...data.map(d => Math.abs(d.val)), 1);
+  const n = data.length, bGW = chartW / n, bW = Math.max(opts.minBar ?? 12, bGW * 0.6);
+  const yB = padT + chartH;
+  const yS = v => padT + chartH - (Math.abs(v) / maxV) * chartH;
+
+  const gridVals = [0, maxV * 0.33, maxV * 0.67, maxV].map(Math.round);
+  let s = [`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">`];
+  gridVals.forEach(v => {
+    const y = yS(v);
+    s.push(`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2535" stroke-width="1"/>`);
+    s.push(`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${v>=1000?(Math.round(v/100)/10)+'k':v>0?'$'+v:v}</text>`);
+  });
+  if (opts.avg) {
+    const avgY = yS(opts.avg);
+    s.push(`<line x1="${padL}" y1="${avgY}" x2="${W-padR}" y2="${avgY}" stroke="#ffe60066" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+    s.push(`<text x="${W-padR-2}" y="${avgY-4}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" font-weight="700" fill="#ffe600">avg ${fmt(opts.avg)}</text>`);
+  }
+  data.forEach((d, i) => {
+    const bx = padL + i * bGW + (bGW - bW) / 2;
+    const bH = Math.max(3, (Math.abs(d.val) / maxV) * chartH);
+    const by = d.val >= 0 ? yB - bH : yB;
+    const col = d.color;
+    s.push(`<rect x="${bx}" y="${by}" width="${bW}" height="${bH}" fill="${col}" opacity="0.88" rx="3" ry="3" style="filter:drop-shadow(0 0 5px ${col}55)"><title>${d.label}: ${fmtS(d.val)}</title></rect>`);
+    const labelY = d.val >= 0 ? by - 6 : by + bH + 14;
+    const valStr = Math.abs(d.val) >= 1000 ? (Math.round(d.val/100)/10)+'k' : fmtS(d.val);
+    s.push(`<text x="${bx+bW/2}" y="${labelY}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#c8d8e8cc">${valStr}</text>`);
+    s.push(`<text x="${bx+bW/2}" y="${yB+16}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="${n>8?8:10}" fill="#4a6070">${d.label}</text>`);
+    if (d.sublabel) s.push(`<text x="${bx+bW/2}" y="${yB+26}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="8" fill="#3a5060">${d.sublabel}</text>`);
+  });
+  s.push('</svg>');
+  wrap.innerHTML = s.join('');
+}
+
+function svgStackedBars(containerId, weeks, tickers, tickerColors, opts = {}) {
+  const wrap = $(containerId);
+  if (!wrap) return;
+  const ordered = Object.keys(weeks).sort((a, b) => {
+    const [am,ad] = a.split('/').map(Number), [bm,bd] = b.split('/').map(Number);
+    return am !== bm ? am - bm : ad - bd;
+  });
+  if (!ordered.length) { wrap.innerHTML = ''; return; }
+  const W = wrap.clientWidth || 640;
+  const H = opts.height || 200;
+  const padL = 44, padR = 20, padT = 28, padB = 28;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const vals = ordered.map(w => weeks[w].total);
+  const maxV = Math.max(...vals, 1);
+  const avgV = Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+  const n = ordered.length, bGW = chartW/n, bW = Math.max(10, bGW*0.6);
+  const yB = padT + chartH;
+  const yS = v => padT + chartH - (v/maxV)*chartH;
+  const gridVals = [0, Math.round(maxV*0.33), Math.round(maxV*0.67), maxV];
+  let s = [`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">`];
+  gridVals.forEach(v => {
+    const y = yS(v);
+    s.push(`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2535" stroke-width="1"/>`);
+    s.push(`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${v>=1000?(Math.round(v/100)/10)+'k':v>0?'$'+v:''}</text>`);
+  });
+  const avgY = yS(avgV);
+  s.push(`<line x1="${padL}" y1="${avgY}" x2="${W-padR}" y2="${avgY}" stroke="#ffe600" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+  s.push(`<text x="${W-padR-2}" y="${avgY-4}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" font-weight="700" fill="#ffe600">avg ${fmt(avgV)}</text>`);
+  ordered.forEach((wk, i) => {
+    const wkD = weeks[wk]; const total = wkD.total;
+    const bx = padL + i*bGW + (bGW-bW)/2; let yOff = 0;
+    tickers.filter(tk => (wkD.tickers[tk]||0)>0).forEach((tk,si,arr) => {
+      const val = wkD.tickers[tk]; const segH = Math.max(2,(val/maxV)*chartH);
+      const segY = yB - yOff - segH; const isTop = si===arr.length-1; const col = tickerColors[tk];
+      s.push(`<rect x="${bx}" y="${segY}" width="${bW}" height="${segH}" fill="${col}" opacity="0.9" rx="${isTop?3:0}" ry="${isTop?3:0}"><title>${tk}: ${fmt(val)}</title></rect>`);
+      yOff += segH;
+    });
+
+    // Total label — inside the bar, large font
+    const totalH = (total/maxV)*chartH;
+    const valStr = total>=1000 ? '$'+(Math.round(total/100)/10)+'k' : '$'+total;
+    const cx = bx + bW/2;
+    const labelFontSize = bW >= 28 ? 11 : 9;
+    if (totalH >= 22) {
+      // Enough height — place label inside near top of bar
+      const labelY = yB - totalH + 14;
+      if (bW >= 26) {
+        // Wide enough for horizontal text
+        s.push(`<text x="${cx}" y="${labelY}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="${labelFontSize}" font-weight="900" fill="rgba(0,0,0,0.75)">${valStr}</text>`);
+      } else {
+        // Narrow bar — rotate vertical
+        s.push(`<text transform="rotate(-90,${cx},${yB-totalH/2})" x="${cx}" y="${yB-totalH/2+4}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="900" fill="rgba(0,0,0,0.75)">${valStr}</text>`);
+      }
+    } else {
+      // Short bar — label above
+      s.push(`<text x="${cx}" y="${yB-totalH-5}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#8090a0">${valStr}</text>`);
+    }
+
+    // X axis label
+    s.push(`<text x="${cx}" y="${yB+16}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="${n>9?8:10}" fill="#4a6070">${wk}</text>`);
+  });
+  s.push('</svg>');
+  wrap.innerHTML = s.join('');
+}
+
+function statStrip(id, stats) {
+  $(id).innerHTML = stats.map((s,i) => `
+    <div class="stat-cell" ${i===0?'':''}> 
+      <div class="stat-cell-label">${s.label}</div>
+      <div class="stat-cell-val" style="color:${s.color}">${s.val}</div>
+    </div>`).join('');
+}
+
+function legendEl(tickers, totals, colors) {
+  return tickers.filter(tk=>totals[tk]>0).map(tk =>
+    `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--dim)">
+      <div style="width:9px;height:9px;border-radius:2px;background:${colors[tk]};box-shadow:0 0 5px ${colors[tk]}88"></div>
+      <span>${tk}</span><span style="color:${colors[tk]}">${fmt(totals[tk])}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════ STATE ════════════════════════════════
+let tradesYear = 'all', tradesTicker = 'all', tradesWeekMonth = 'all';
+let monthlyYear = 'all';
+
+function getYearButtons(currentVal, onclickFn) {
+  const years = [...new Set(minisumTrades.map(t => t.year))].filter(Boolean).sort();
+  return `<button class="fb${currentVal==='all'?' active':''}" onclick="${onclickFn}('all',this)">All</button>` +
+    years.map(y => `<button class="fb${currentVal===y?' active':''}" onclick="${onclickFn}('${y}',this)">${y}</button>`).join('');
+}
+
+function initYearFilters() {
+  const filters = [
+    ['trades-year-filter', 'setTradesYear'],
+    ['monthly-year-filter', 'setMonthlyYear'],
+  ];
+  filters.forEach(([id, fn]) => {
+    const el = $(id);
+    if (el) el.innerHTML = getYearButtons('all', fn);
+  });
+}
+
+function getYears() {
+  return [...new Set(minisumTrades.map(t=>t.year))].sort();
+}
+function filterByYear(year) {
+  if (year === 'all') return minisumTrades;
+  const y = String(year);
+  return minisumTrades.filter(t => String(t.year) === y);
+}
+
+// ════════════════════════════════ PAGE: TRADES ════════════════════════════════
+function setTradesYear(y, btn) {
+  tradesYear = (y === 'all') ? 'all' : parseInt(y, 10); tradesTicker = 'all'; tradesWeekMonth = 'all';
+  $('trades-year-filter').innerHTML = getYearButtons(y, 'setTradesYear');
+  renderTrades();
+}
+function setTradesTicker(v, btn) {
+  tradesTicker = v;
+  $('trades-ticker-filter').querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTradesTable();
+}
+function setTradesWeekMonth(m, btn) {
+  tradesWeekMonth = m;
+  $('trades-week-year').querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTradesWeekBars();
+}
+
+function buildWeekMonthButtons() {
+  // Show month buttons for the active year's data (or all months if year=all)
+  const base = filterByYear(tradesYear);
+  const activeMons = [...new Set(base.map(t => mon(t.open)))].sort((a,b) => MONTHS.indexOf(a) - MONTHS.indexOf(b));
+  const el = $('trades-week-year');
+  if (!el) return;
+  el.innerHTML = `<button class="fb${tradesWeekMonth==='all'?' active':''}" onclick="setTradesWeekMonth('all',this)">All</button>` +
+    activeMons.map(m => `<button class="fb${tradesWeekMonth===m?' active':''}" onclick="setTradesWeekMonth('${m}',this)">${m}</button>`).join('');
+}
+
+function renderTrades() {
+  const base = filterByYear(tradesYear);
+
+  // Stat cards
+  const totalProfit = base.reduce((s,t)=>s+t.profit, 0);
+  const wheelPnl    = base.reduce((s,t)=>s+(t.wheel||0), 0);
+  const caps        = base.filter(t=>t.capital>0).map(t=>t.capital);
+  const avgCap      = caps.length ? Math.round(caps.reduce((a,c)=>a+c,0)/caps.length) : 0;
+  // Group by calendar week (matching booked premium chart logic) for weekly avg
+  const weekMapCard = {};
+  base.filter(t=>t.result!=='In Progress').forEach(t => {
+    const key = t.year + '-' + t.week;
+    weekMapCard[key] = (weekMapCard[key]||0) + t.profit;
+  });
+  const weekVals  = Object.values(weekMapCard);
+  const weeklyAvg = weekVals.length ? Math.round(weekVals.reduce((a,v)=>a+v,0)/weekVals.length) : 0;
+
+  $('t-prem').textContent = fmt(totalProfit);
+  $('t-wheel').textContent = fmtS(wheelPnl);
+  $('t-cap').textContent = fmt(avgCap);
+  $('t-weekly').textContent = fmt(weeklyAvg);
+  $('t-weekly-sub').textContent = `Avg over ${weekVals.length} expirations`;
+  $('t-count').textContent = base.length;
+  const totalContracts = base.filter(t => t.type === 'Put' || t.type === 'Call').reduce((s,t) => s + Math.floor(t.shares/100), 0);
+  if ($('t-contracts')) $('t-contracts').textContent = totalContracts.toLocaleString();
+  $('trades-sub').textContent = `${base.length} trades · ${tradesYear === 'all' ? 'all years' : tradesYear}`;
+
+  // Donut
+  const puts  = base.filter(t=>t.type==='Put');
+  const calls = base.filter(t=>t.type==='Call');
+  const circ  = 226, total = base.length || 1;
+  const putArc = Math.round(puts.length/total*circ);
+  const callArc= Math.round(calls.length/total*circ);
+  $set('d-put', 'stroke-dasharray', putArc+' '+circ);
+  $set('d-call', 'stroke-dasharray', callArc+' '+circ);
+  $set('d-call', 'stroke-dashoffset', '-'+putArc);
+  $('d-count').textContent = base.length;
+
+  const results = {Expired:0, Rolled:0, Assigned:0, 'Bought Back':0, 'In Progress':0};
+  const rColors = {Expired:'var(--g)',Rolled:'var(--pu)',Assigned:'var(--p)','Bought Back':'var(--dim)','In Progress':'var(--o)'};
+  base.forEach(t => { if (results[t.result]!==undefined) results[t.result]++; });
+  const putProfit  = Math.round(puts.reduce((s,t)=>s+t.profit,0));
+  const callProfit = Math.round(calls.reduce((s,t)=>s+t.profit,0));
+  const putCon     = puts.reduce((s,t)=>s+Math.floor(t.shares/100),0);
+  const callCon    = calls.reduce((s,t)=>s+Math.floor(t.shares/100),0);
+  $('d-legend').innerHTML = // Type stats — first two cells
+    `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px">
+       <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">Puts</div>
+       <div style="font-size:18px;font-weight:900;color:var(--b)">${putCon} <span style="font-size:11px;font-weight:600;color:var(--dim)">contracts</span></div>
+       <div style="font-size:12px;font-weight:700;color:var(--b);margin-top:2px">${fmt(putProfit)}</div>
+     </div>
+     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px">
+       <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">Calls</div>
+       <div style="font-size:18px;font-weight:900;color:var(--y)">${callCon} <span style="font-size:11px;font-weight:600;color:var(--dim)">contracts</span></div>
+       <div style="font-size:12px;font-weight:700;color:var(--y);margin-top:2px">${fmt(callProfit)}</div>
+     </div>` +
+    // Result breakdown — remaining cells
+    Object.entries(results).map(([k,v]) =>
+      `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px">
+         <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">${k}</div>
+         <div style="font-size:22px;font-weight:900;color:${rColors[k]}">${v}</div>
+       </div>`
+    ).join('');
+
+  // Ticker buttons
+  const tickers = [...new Set(base.map(t=>t.stock))].sort();
+  $('trades-ticker-filter').innerHTML = `<button class="fb${tradesTicker==='all'?' active':''}" onclick="setTradesTicker('all',this)">All</button>` +
+    tickers.map(tk=>`<button class="fb${tradesTicker===tk?' active':''}" onclick="setTradesTicker('${tk}',this)">${tk}</button>`).join('');
+
+  renderTradesTable();
+  buildWeekMonthButtons();
+  renderTradesWeekBars();
+  renderTradeAnalytics(base);
+}
+
+function renderTradeAnalytics(base) {
+  if (!base || !base.length) return;
+
+  // ── Trade Quality ──────────────────────────────────────────────────────────
+  const winners  = base.filter(t => t.profit > 0);
+  const losers   = base.filter(t => t.profit <= 0);
+  const winRate  = Math.round(winners.length / base.length * 100);
+  const avgWin   = winners.length ? Math.round(winners.reduce((s,t)=>s+t.profit,0)/winners.length) : 0;
+  const avgLoss  = losers.length  ? Math.round(losers.reduce((s,t)=>s+t.profit,0)/losers.length)  : 0;
+
+  $('tq-winrate').textContent = winRate + '%';
+  $('tq-total').textContent = base.length;
+  $('tq-win-count').textContent = winners.length + ' · avg ' + fmt(avgWin);
+  $('tq-loss-count').textContent = losers.length + ' · avg ' + fmtS(avgLoss);
+  $('tq-avg-win').textContent = fmt(avgWin);
+  $('tq-avg-loss').textContent = fmtS(avgLoss);
+  setTimeout(() => {
+    $('tq-win-bar').style.width  = winRate + '%';
+    $('tq-loss-bar').style.width = (100 - winRate) + '%';
+  }, 60);
+
+  // ── Return Distribution histogram ─────────────────────────────────────────
+  const retBuckets = [
+    { label: '0%',    lo: 0,    hi: 0,   color: '#4a6080', exact: true },
+    { label: '< 0%',  lo: -999, hi: 0,   color: '#ff2d87' },
+    { label: '0–1%',  lo: 0,    hi: 1,   color: '#00d4ff' },
+    { label: '1–2%',  lo: 1,    hi: 2,   color: '#00ff87' },
+    { label: '2–3%',  lo: 2,    hi: 3,   color: '#00ff87' },
+    { label: '3–5%',  lo: 3,    hi: 5,   color: '#b44dff' },
+    { label: '5–10%', lo: 5,    hi: 10,  color: '#ff7b00' },
+    { label: '10%+',  lo: 10,   hi: 999, color: '#ffaa00' },
+  ];
+  const validRets = base.map(t => parseFloat(String(t.ret).replace('%',''))).filter(r => !isNaN(r) && Math.abs(r) < 50);
+  retBuckets.forEach(b => {
+    b.count = b.exact ? validRets.filter(r => r === 0).length : validRets.filter(r => r >= b.lo && r < b.hi).length;
+    b.pct   = validRets.length ? b.count / validRets.length : 0;
+  });
+  const maxCount = Math.max(...retBuckets.map(b => b.count), 1);
+
+  const rdWrap = $('ret-dist');
+  // Horizontal bar chart — works cleanly at any sample size
+  rdWrap.innerHTML = retBuckets.map(b => {
+    const pct    = Math.round(b.pct * 100);
+    const barW   = Math.round(b.pct * 100); // % width
+    const dimmed = b.count === 0;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+      <div style="width:44px;text-align:right;font-size:10px;font-weight:700;color:${dimmed ? '#2a3545' : b.color};flex-shrink:0">${b.label}</div>
+      <div style="flex:1;height:20px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative">
+        <div style="height:100%;width:${barW}%;background:${b.color};border-radius:4px;transition:width .5s;min-width:${b.count>0?'3px':'0'};box-shadow:${b.count>0?'0 0 8px '+b.color+'55':'none'}"></div>
+        ${b.count > 0 ? `<span style="position:absolute;left:${Math.min(barW+1,88)}%;top:50%;transform:translateY(-50%);font-size:11px;font-weight:900;color:${barW > 50 ? 'rgba(0,0,0,0.7)' : b.color};${barW > 50 ? 'left:8px' : ''};white-space:nowrap;padding:0 4px">${b.count} <span style="font-size:9px;font-weight:600;opacity:.7">${pct}%</span></span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Hold Duration ─────────────────────────────────────────────────────────
+  // Compute days between open and expiry using week numbers as proxy
+  // Use year+week of exp vs year+week of open
+  const holdBuckets = [
+    { label: '1–3 days',  lo: 1,  hi: 3  },
+    { label: '4–7 days',  lo: 4,  hi: 7  },
+    { label: '8–14 days', lo: 8,  hi: 14 },
+    { label: '15+ days',  lo: 15, hi: 999 },
+  ];
+
+  // Estimate days from exp week vs open date string
+  const MONTH_NUMS = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12,
+    January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12};
+
+  function parseDateStr(s) {
+    if (!s) return null;
+    s = s.trim();
+    // "M/D/YYYY" or "M/D/YY" — primary format in the data
+    const slash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+    if (slash) {
+      const yr = parseInt(slash[3]); 
+      return new Date(yr < 100 ? 2000 + yr : yr, parseInt(slash[1]) - 1, parseInt(slash[2]));
+    }
+    // "Jan 5 2024" or "January 5 2024"
+    const p = s.split(' ');
+    if (p.length >= 2 && MONTH_NUMS[p[0]] && !isNaN(p[1])) {
+      const yr = p[2] ? parseInt(p[2]) : new Date().getFullYear();
+      return new Date(yr, MONTH_NUMS[p[0]] - 1, parseInt(p[1]));
+    }
+    return null;
+  }
+
+  let totalDays = 0, daysCount = 0;
+  holdBuckets.forEach(b => b.count = 0);
+
+  base.forEach(t => {
+    const od = parseDateStr(t.open);
+    const ed = parseDateStr(t.exp);
+    if (!od || !ed) return;
+    let diff = Math.round((ed - od) / 86400000);
+    if (diff < 0) diff += 365; // year wrap
+    if (diff < 0 || diff > 365) return;
+    totalDays += diff; daysCount++;
+    const bucket = holdBuckets.find(b => diff >= b.lo && diff <= b.hi);
+    if (bucket) bucket.count++;
+  });
+
+  const avgDays = daysCount ? (totalDays / daysCount).toFixed(1) : '—';
+  $('hd-avg').textContent = avgDays;
+
+  const hdMax = Math.max(...holdBuckets.map(b => b.count), 1);
+  const hdColors = ['#00d4ff', '#00ff87', '#b44dff', '#ff7b00'];
+  $('hold-dist').innerHTML = holdBuckets.map((b, i) => {
+    const pct = Math.round(b.count / (daysCount || 1) * 100);
+    const barW = Math.round(b.count / hdMax * 100);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:700;color:${hdColors[i]}">${b.label}</span>
+        <span style="font-size:10px;color:var(--dim)">${b.count} trades · ${pct}%</span>
+      </div>
+      <div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${barW}%;background:${hdColors[i]};border-radius:4px;transition:width .5s;box-shadow:0 0 6px ${hdColors[i]}66"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTradesTable() {
+  const base = filterByYear(tradesYear);
+  const data = (tradesTicker==='all' ? base : base.filter(t=>t.stock===tradesTicker)).slice().reverse();
+  const totP  = data.reduce((s,t)=>s+t.prem, 0);
+  const totC  = data.reduce((s,t)=>s+t.cost, 0);
+  const totPr = data.reduce((s,t)=>s+t.profit, 0);
+  const totCp = data.reduce((s,t)=>s+t.capital, 0);
+  const avgR  = data.length ? (data.reduce((s,t)=>s+parseFloat(t.ret||0),0)/data.length).toFixed(1)+'%' : '—';
+  $('trades-foot').innerHTML = `<tr style="background:rgba(0,255,135,.04);border-bottom:2px solid var(--border)">
+    <td colspan="6" style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)">${data.length} trades · total</td>
+    <td class="r pos">${fmt(totP)}</td><td class="r dim">${totC<0?'−'+fmt(Math.abs(totC)):'—'}</td>
+    <td class="r pos">${fmt(totPr)}</td><td class="r dim">${fmt(totCp)}</td>
+    <td class="r dim">${avgR}</td><td></td></tr>`;
+  $('trades-body').innerHTML = data.map(t=>`<tr>
+    <td><strong>${t.stock}</strong></td><td class="dim">${t.open}</td><td class="dim">${t.exp}</td>
+    <td class="r">${t.shares.toLocaleString()}</td><td class="r">${t.strike}</td><td>${badge(t.type)}</td>
+    <td class="r pos">${fmt(t.prem)}</td>
+    <td class="r ${t.cost<0?'neg':'dim'}">${t.cost<0?'−'+fmt(Math.abs(t.cost)):'—'}</td>
+    <td class="r ${t.profit<0?'neg':'pos'}">${fmtS(t.profit)}</td>
+    <td class="r dim">${fmt(t.capital)}</td><td class="r">${t.ret}</td><td>${badge(t.result)}</td>
+  </tr>`).join('');
+}
+
+function renderTradesWeekBars() {
+  const base = filterByYear(tradesYear);
+  // Sub-filter by month if one is selected
+  const data = tradesWeekMonth === 'all' ? base : base.filter(t => mon(t.open) === tradesWeekMonth);
+
+  // Label style: single year selected AND single month → just "Wk N"
+  //              single year, all months  → "Wk N"
+  //              all years               → "YYYY WN" to avoid collisions
+  const isSingleYear = tradesYear !== 'all';
+  const weekMap = {}, tickerTotals = {};
+
+  data.forEach(t => {
+    if (t.week == null) return;
+    const key = isSingleYear ? t.week : t.year + '-' + String(t.week).padStart(2,'0');
+    if (!weekMap[key]) weekMap[key] = {total:0, tickers:{}, week:t.week, year:t.year};
+    weekMap[key].total += t.profit;
+    weekMap[key].tickers[t.stock] = (weekMap[key].tickers[t.stock]||0) + t.profit;
+    tickerTotals[t.stock] = (tickerTotals[t.stock]||0) + t.profit;
+  });
+
+  const ordered = Object.keys(weekMap).sort((a,b) => {
+    const [ay,aw] = a.includes('-') ? a.split('-').map(Number) : [0, Number(a)];
+    const [by,bw] = b.includes('-') ? b.split('-').map(Number) : [0, Number(b)];
+    return ay !== by ? ay - by : aw - bw;
+  });
+
+  if (!ordered.length) {
+    $('tw-bars').innerHTML = '<div style="padding:20px;color:var(--dim);font-size:11px">No data</div>';
+    $('tw-stats').innerHTML = ''; $('tw-legend').innerHTML = ''; return;
+  }
+
+  ordered.forEach(k => {
+    const d = weekMap[k];
+    d.label = isSingleYear ? 'Wk '+d.week : d.year+' W'+d.week;
+  });
+
+  const tickers = Object.keys(tickerTotals).sort((a,b)=>tickerTotals[b]-tickerTotals[a]);
+  const colors  = Object.fromEntries(tickers.map(tk=>[tk,tc(tk)]));
+  const vals    = ordered.map(k=>weekMap[k].total);
+  const total   = Math.round(vals.reduce((s,v)=>s+v,0));
+  const avg     = vals.length ? Math.round(total/vals.length) : 0;
+  const bestKey = ordered.reduce((a,b)=>weekMap[a].total>weekMap[b].total?a:b);
+  const bestWk  = weekMap[bestKey];
+  const monthLabel = tradesWeekMonth !== 'all' ? ' · '+tradesWeekMonth : '';
+
+  statStrip('tw-stats', [
+    {label:'Total Booked', val:fmt(total),  color:'var(--g)'},
+    {label:'Weekly Avg',   val:fmt(avg),    color:'var(--y)'},
+    {label:'Best Week',    val:fmt(bestWk.total)+' (Wk '+bestWk.week+(isSingleYear?'':' '+bestWk.year)+')', color:'var(--b)'},
+    {label:'Weeks Active', val:ordered.length+(tradesWeekMonth==='all'?' of 52':''), color:'var(--pu)'},
+  ]);
+
+  const weeksForChart = {};
+  ordered.forEach(k => {
+    const d = weekMap[k];
+    weeksForChart[d.label] = {total: d.total, tickers: d.tickers};
+  });
+  svgStackedBars('tw-bars', weeksForChart, tickers, colors);
+
+  $('tw-legend').innerHTML = legendEl(tickers, tickerTotals, colors) +
+    `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--dim)"><svg width="16" height="8" style="overflow:visible"><line x1="0" y1="4" x2="16" y2="4" stroke="#ffe600" stroke-width="1.5" stroke-dasharray="4,3"/></svg><span style="color:#ffe600">Weekly avg</span></div>`;
+}
+
+// ════════════════════════════════ PAGE: MONTHLY ════════════════════════════════
+function setMonthlyYear(y, btn) {
+  monthlyYear = y;
+  $('monthly-year-filter').innerHTML = getYearButtons(y, 'setMonthlyYear');
+  renderMonthly();
+}
+
+function renderMonthly() {
+  const base = filterByYear(monthlyYear);
+  const byMon = {}, tickerTotals = {}, byMonTickers = {};
+  MONTHS.forEach(m => { byMon[m] = {prem:0,profit:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0}; byMonTickers[m] = {}; });
+  base.forEach(t => {
+    const m = mon(t.open);
+    if (!byMon[m]) return;
+    byMon[m].prem += t.prem; byMon[m].profit += t.profit; byMon[m].trades++;
+    if (t.type==='Put') byMon[m].puts++; else byMon[m].calls++;
+    if (t.result==='Expired') byMon[m].expired++;
+    if (t.result==='Assigned') byMon[m].assigned++;
+    if (t.result==='Rolled') byMon[m].rolled++;
+    byMonTickers[m][t.stock] = (byMonTickers[m][t.stock]||0)+t.profit;
+    tickerTotals[t.stock] = (tickerTotals[t.stock]||0)+t.profit;
+  });
+  const activeMons = MONTHS.filter(m=>byMon[m].trades>0);
+  const profits    = activeMons.map(m=>byMon[m].profit);
+  const bestMon    = activeMons[profits.indexOf(Math.max(...profits))];
+  const totalProfit= Math.round(profits.reduce((s,v)=>s+v,0));
+  const avgProfit  = activeMons.length ? Math.round(totalProfit/activeMons.length) : 0;
+
+  $('m-best').textContent = fmt(byMon[bestMon]?.profit||0);
+  $('m-best-sub').textContent = bestMon || '—';
+  $('m-avg').textContent = fmt(avgProfit);
+  $('m-total').textContent = fmt(totalProfit);
+  $('m-months').textContent = activeMons.length;
+  $('monthly-sub').textContent = `${base.length} trades · ${monthlyYear==='all'?'all years':monthlyYear}`;
+
+  const tickers = Object.keys(tickerTotals).sort((a,b)=>tickerTotals[b]-tickerTotals[a]);
+  const colors  = Object.fromEntries(tickers.map(tk=>[tk,tc(tk)]));
+
+  statStrip('m-stat-strip', [
+    {label:'Total Profit',  val:fmt(totalProfit),  color:'var(--g)'},
+    {label:'Monthly Avg',   val:fmt(avgProfit),    color:'var(--y)'},
+    {label:'Best Month',    val:fmt(byMon[bestMon]?.profit||0)+' ('+bestMon+')', color:'var(--b)'},
+    {label:'Active Months', val:activeMons.length+' months', color:'var(--pu)'},
+  ]);
+
+  // Build weeks-style data keyed by month for stacked bars
+  const monWeeks = {};
+  activeMons.forEach(m => {
+    monWeeks[m] = {total: byMon[m].profit, tickers: byMonTickers[m]};
+  });
+  // Custom stacked monthly bars
+  const wrap = $('m-bars');
+  const W = wrap.clientWidth || 700, H = 220;
+  const padL=48, padR=20, padT=28, padB=32, chartW=W-padL-padR, chartH=H-padT-padB;
+  const maxV = Math.max(...activeMons.map(m=>Math.abs(byMon[m].profit)),1);
+  const avgV = avgProfit;
+  const n = activeMons.length, bGW=chartW/n, bW=Math.max(20,bGW*0.65), yB=padT+chartH;
+  const yS = v => padT+chartH - (Math.abs(v)/maxV)*chartH;
+  const gridVals = [0,Math.round(maxV*0.33),Math.round(maxV*0.67),maxV];
+  let s=[`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">`];
+  gridVals.forEach(v=>{const y=yS(v);s.push(`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2535" stroke-width="1"/><text x="${padL-6}" y="${y+3}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${v>=1000?(Math.round(v/100)/10)+'k':'$'+v}</text>`);});
+  const avgY=yS(avgV);
+  s.push(`<line x1="${padL}" y1="${avgY}" x2="${W-padR}" y2="${avgY}" stroke="#ffe600" stroke-width="1.5" stroke-dasharray="5,4"/><text x="${W-padR-2}" y="${avgY-4}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" font-weight="700" fill="#ffe600">avg ${fmt(avgV)}</text>`);
+  activeMons.forEach((m,i)=>{
+    const total=byMon[m].profit; const bx=padL+i*bGW+(bGW-bW)/2; let yOff=0;
+    tickers.filter(tk=>(byMonTickers[m][tk]||0)>0).forEach((tk,si,arr)=>{
+      const val=byMonTickers[m][tk]; const segH=Math.max(2,(val/maxV)*chartH);
+      const segY=yB-yOff-segH; const isTop=si===arr.length-1; const col=colors[tk];
+      s.push(`<rect x="${bx}" y="${segY}" width="${bW}" height="${segH}" fill="${col}" opacity="0.9" rx="${isTop?3:0}" ry="${isTop?3:0}"><title>${tk}: ${fmt(val)}</title></rect>`);
+      yOff+=segH;
+    });
+    const totalH=(total/maxV)*chartH;
+    const valStr = total>=1000?'$'+(Math.round(total/100)/10)+'k':'$'+total;
+    const cx = bx+bW/2;
+    if (totalH >= 22) {
+      s.push(`<text x="${cx}" y="${yB-totalH+14}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" font-weight="900" fill="rgba(0,0,0,0.75)">${valStr}</text>`);
+    } else {
+      s.push(`<text x="${cx}" y="${yB-totalH-5}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#8090a0">${valStr}</text>`);
+    }
+    s.push(`<text x="${cx}" y="${yB+16}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#6080a0">${m}</text>`);
+  });
+  s.push('</svg>');
+  wrap.innerHTML=s.join('');
+
+  $('m-legend').innerHTML = legendEl(tickers, tickerTotals, colors) +
+    `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--dim)"><svg width="16" height="8" style="overflow:visible"><line x1="0" y1="4" x2="16" y2="4" stroke="#ffe600" stroke-width="1.5" stroke-dasharray="4,3"/></svg><span style="color:#ffe600">Monthly avg</span></div>`;
+
+  $('monthly-body').innerHTML = activeMons.map(m=>{
+    const d=byMon[m], avg=d.trades?Math.round(d.profit/d.trades):0;
+    return `<tr>
+      <td><strong>${m}</strong></td><td class="r">${d.trades}</td><td class="r dim">${d.puts}</td><td class="r dim">${d.calls}</td>
+      <td class="r pos">${fmt(d.prem)}</td><td class="r pos">${fmt(d.profit)}</td><td class="r dim">${fmt(avg)}</td>
+      <td class="r dim">${d.expired}</td><td class="r dim">${d.assigned}</td><td class="r dim">${d.rolled}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════ PAGE: YEARLY ════════════════════════════════
+function renderYearly() {
+  const years = getYears();
+  const byYear = {}, byYearMon = {};
+  years.forEach(y => { byYear[y]=0; byYearMon[y]={}; MONTHS.forEach(m=>byYearMon[y][m]=0); });
+  minisumTrades.forEach(t => {
+    if (!byYear[t.year]===undefined) byYear[t.year]=0;
+    byYear[t.year] = (byYear[t.year]||0) + t.profit;
+    if (!byYearMon[t.year]) byYearMon[t.year]={};
+    const m = mon(t.open);
+    byYearMon[t.year][m] = (byYearMon[t.year][m]||0) + t.profit;
+  });
+
+  const totalAll = Math.round(minisumTrades.reduce((s,t)=>s+t.profit,0));
+  // 2026 YTD
+  const ytd2026 = byYear['2026'] || 0;
+  const active2026Months = MONTHS.filter(m=>byYearMon['2026']&&byYearMon['2026'][m]>0);
+  const runRate = active2026Months.length ? Math.round(ytd2026/active2026Months.length*12) : 0;
+  // Best month ever
+  let bestMonVal=0, bestMonLabel='';
+  Object.entries(byYearMon).forEach(([y,mons])=>Object.entries(mons).forEach(([m,v])=>{if(v>bestMonVal){bestMonVal=v;bestMonLabel=m+' '+y;}}));
+
+  $('yr-2026').textContent = fmt(ytd2026);
+  $('yr-2026-sub').textContent = `${active2026Months.length} active months`;
+  $('yr-rate').textContent = fmt(runRate);
+  $('yr-best').textContent = fmt(bestMonVal);
+  $('yr-best-sub').textContent = bestMonLabel;
+  $('yr-total').textContent = fmt(totalAll);
+  $('yr-total-sub').textContent = `${minisumTrades.length} total trades`;
+
+  // YoY bars — grouped by month, years side by side, full width
+  const wrap=$('yoy-bars'), W=wrap.clientWidth||900, H=280;
+  const padL=48,padR=24,padT=28,padB=36,chartW=W-padL-padR,chartH=H-padT-padB;
+  const yearColors={'2024':'#b44dff','2025':'#00d4ff','2026':'#00ff87'};
+  const activeMons=MONTHS.filter(m=>years.some(y=>byYearMon[y]&&byYearMon[y][m]>0));
+  const allVals=activeMons.flatMap(m=>years.map(y=>(byYearMon[y]&&byYearMon[y][m])||0));
+  const maxV=Math.max(...allVals,1);
+  const n=activeMons.length, groupW=chartW/n;
+  const bW=Math.max(8, Math.min(32, groupW/years.length*0.78));
+  const groupGap=(groupW - bW*years.length)/2;
+  const yB=padT+chartH;
+  const yS=v=>padT+chartH-(v/maxV)*chartH;
+  const gridVals=[0,Math.round(maxV*0.25),Math.round(maxV*0.5),Math.round(maxV*0.75),maxV];
+  let s=[`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">`];
+  gridVals.forEach(v=>{
+    const y=yS(v);
+    s.push(`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2535" stroke-width="1"/>`);
+    s.push(`<text x="${padL-6}" y="${y+3}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${v>=1000?(Math.round(v/100)/10)+'k':'$'+v}</text>`);
+  });
+  activeMons.forEach((m,i)=>{
+    const gx=padL+i*groupW+groupGap;
+    // Monthly total per year — label inside bar rotated
+    years.forEach((y,j)=>{
+      const val=(byYearMon[y]&&byYearMon[y][m])||0; if(!val) return;
+      const bx=gx+j*bW; const bH=Math.max(2,(val/maxV)*chartH); const by=yB-bH; const col=yearColors[y];
+      s.push(`<rect x="${bx}" y="${by}" width="${bW-1}" height="${bH}" fill="${col}" opacity="0.88" rx="2"><title>${y} ${m}: ${fmt(val)}</title></rect>`);
+      // Label inside bar — vertical if tall enough, above if short
+      const valStr = val>=1000 ? '$'+(Math.round(val/100)/10)+'k' : '$'+val;
+      const cx = bx + (bW-1)/2;
+      if (bH >= 28) {
+        // Rotate vertically inside the bar
+        s.push(`<text transform="rotate(-90,${cx},${by+bH/2})" x="${cx}" y="${by+bH/2+4}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" font-weight="900" fill="rgba(0,0,0,0.72)">${valStr}</text>`);
+      } else if (bH >= 2) {
+        // Too short for inside — show above in the year color
+        s.push(`<text x="${cx}" y="${by-4}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="8" font-weight="800" fill="${col}">${valStr}</text>`);
+      }
+    });
+    // Month label centered under group
+    s.push(`<text x="${padL+i*groupW+groupW/2}" y="${yB+18}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="${n>10?9:11}" font-weight="700" fill="#5a7080">${m}</text>`);
+  });
+  s.push('</svg>');
+  wrap.innerHTML=s.join('');
+  $('yoy-legend').innerHTML=years.map(y=>`<div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700"><div style="width:10px;height:10px;border-radius:2px;background:${yearColors[y]};box-shadow:0 0 5px ${yearColors[y]}88"></div><span style="color:${yearColors[y]}">${y}</span><span style="color:var(--dim)">${fmt(byYear[y]||0)}</span></div>`).join('');
+
+  // Result distribution — horizontal bars in a grid
+  const results={'Expired':0,'Assigned':0,'Rolled':0,'Bought Back':0,'In Progress':0};
+  const rColors={'Expired':'var(--g)','Assigned':'var(--p)','Rolled':'var(--pu)','Bought Back':'#5a7080','In Progress':'var(--o)'};
+  const rHex   ={'Expired':'#00ff87','Assigned':'#ff2d87','Rolled':'#b44dff','Bought Back':'#5a7080','In Progress':'#ff7b00'};
+  minisumTrades.forEach(t=>{if(results[t.result]!==undefined)results[t.result]++;});
+  const totalTrades=minisumTrades.length;
+  $('result-bars').innerHTML=Object.entries(results).map(([k,v])=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+      <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px">${k}</div>
+      <div style="font-size:30px;font-weight:900;color:${rColors[k]};line-height:1">${v}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--dim);margin:4px 0 10px">${Math.round(v/totalTrades*100)}% of trades</div>
+      <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(v/totalTrades*100)}%;background:${rHex[k]};border-radius:3px;box-shadow:0 0 6px ${rHex[k]}66"></div>
+      </div>
+    </div>`).join('');
+
+  // YoY table
+  $('yoy-body').innerHTML=MONTHS.map(m=>{
+    const y24=(byYearMon['2024']&&byYearMon['2024'][m])||0;
+    const y25=(byYearMon['2025']&&byYearMon['2025'][m])||0;
+    const y26=(byYearMon['2026']&&byYearMon['2026'][m])||0;
+    if(!y24&&!y25&&!y26) return '';
+    const delta = y26&&y25 ? y26-y25 : null;
+    const dStr  = delta!==null ? `<span style="color:${delta>=0?'var(--g)':'var(--p)'}">${delta>=0?'+':''}${fmt(delta)}</span>` : '<span class="dim">—</span>';
+    return `<tr><td><strong>${m}</strong></td>
+      <td class="r dim">${y24?fmt(y24):'—'}</td>
+      <td class="r" style="color:var(--b)">${y25?fmt(y25):'—'}</td>
+      <td class="r" style="color:var(--g)">${y26?fmt(y26):'—'}</td>
+      <td class="r">${dStr}</td></tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════ PAGE: TICKERS ════════════════════════════════
+function renderTickers() {
+  const byTicker = {};
+  minisumTrades.forEach(t=>{
+    if(!byTicker[t.stock]) byTicker[t.stock]={prem:0,profit:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0,rets:[],cap:0};
+    const d=byTicker[t.stock];
+    d.prem+=t.prem; d.profit+=t.profit; d.trades++; d.cap+=t.capital;
+    if(t.type==='Put') d.puts++; else d.calls++;
+    if(t.result==='Expired') d.expired++;
+    if(t.result==='Assigned') d.assigned++;
+    if(t.result==='Rolled') d.rolled++;
+    if(t.ret) d.rets.push(parseFloat(t.ret));
+  });
+  const tickers=Object.keys(byTicker).sort((a,b)=>byTicker[b].profit-byTicker[a].profit);
+  const top=tickers[0];
+  const mostActive=tickers.reduce((a,b)=>byTicker[a].trades>byTicker[b].trades?a:b);
+  const bestRet=tickers.reduce((a,b)=>{
+    const ra=byTicker[a].rets.length?byTicker[a].rets.reduce((s,v)=>s+v,0)/byTicker[a].rets.length:0;
+    const rb=byTicker[b].rets.length?byTicker[b].rets.reduce((s,v)=>s+v,0)/byTicker[b].rets.length:0;
+    return ra>rb?a:b;
+  });
+
+  $('tk-top').textContent = top;
+  $('tk-top-sub').textContent = fmt(byTicker[top].profit)+' total profit';
+  $('tk-active').textContent = mostActive;
+  $('tk-active-sub').textContent = byTicker[mostActive].trades+' trades';
+  const avgR=byTicker[bestRet].rets.length?byTicker[bestRet].rets.reduce((s,v)=>s+v,0)/byTicker[bestRet].rets.length:0;
+  $('tk-ret').textContent = bestRet;
+  $('tk-ret-sub').textContent = avgR.toFixed(1)+'% avg return';
+  $('tk-count').textContent = tickers.length;
+
+  svgBars('ticker-bars', tickers.map(tk=>({label:tk,val:byTicker[tk].profit,color:tc(tk)})),
+    {height:220, avg:Math.round(minisumTrades.reduce((s,t)=>s+t.profit,0)/tickers.length)});
+
+  $('tickers-body').innerHTML=tickers.map(tk=>{
+    const d=byTicker[tk];
+    const avgT=d.trades?Math.round(d.profit/d.trades):0;
+    const avgRet=d.rets.length?(d.rets.reduce((s,v)=>s+v,0)/d.rets.length).toFixed(1)+'%':'—';
+    const winRate=d.trades?Math.round((d.expired+d.rolled)/d.trades*100)+'%':'—';
+    const topResult=[['Expired',d.expired],['Assigned',d.assigned],['Rolled',d.rolled]].sort((a,b)=>b[1]-a[1])[0];
+    return `<tr>
+      <td><strong style="color:${tc(tk)}">${tk}</strong></td>
+      <td class="r">${d.trades}</td><td class="r dim">${d.puts}</td><td class="r dim">${d.calls}</td>
+      <td class="r pos">${fmt(d.prem)}</td><td class="r pos">${fmt(d.profit)}</td><td class="r dim">${fmt(avgT)}</td>
+      <td class="r dim">${avgRet}</td><td class="r dim">${winRate}</td><td>${badge(topResult[0])}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════ PAGE: PROJECTION ════════════════════════════════
+function renderProjection() {
+  // ── Build monthly actuals by year ──────────────────────────────────────────
+  const byYM = {};
+  const MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  MONTHS_LONG.forEach(m => { byYM['2024_'+m]=0; byYM['2025_'+m]=0; byYM['2026_'+m]=0; });
+  minisumTrades.forEach(t => {
+    // use long month name since t.open is e.g. "January 9"
+    const longMon = t.open.split(' ')[0];
+    const k = t.year + '_' + longMon;
+    if (byYM[k] !== undefined) byYM[k] += t.profit;
+  });
+
+  const y24total = Math.round(minisumTrades.filter(t => String(t.year)==='2024').reduce((s,t)=>s+t.profit,0));
+  const y25total = Math.round(minisumTrades.filter(t => String(t.year)==='2025').reduce((s,t)=>s+t.profit,0));
+  const y24monthly = MONTHS_LONG.map(m => Math.round(byYM['2024_'+m]));
+  const y25monthly = MONTHS_LONG.map(m => Math.round(byYM['2025_'+m]));
+  const y26actual  = MONTHS_LONG.map(m => Math.round(byYM['2026_'+m]));
+  const y26ytd     = y26actual.reduce((s,v)=>s+v, 0);
+  const y26months  = y26actual.filter(v=>v>0).length;
+
+  // ── Weighted multi-year baseline ───────────────────────────────────────────
+  // For months where 2026 actuals exist: weight 2024×15% + 2025×35% + 2026×50%
+  // For future months: weight 2024×30% + 2025×70%
+  // As more years accumulate, this auto-smooths — 2025's outlier months get diluted
+  const weightedBase = MONTHS_LONG.map((m, i) => {
+    const v24 = y24monthly[i], v25 = y25monthly[i], v26 = y26actual[i];
+    return v26 > 0
+      ? Math.round(v24*0.15 + v25*0.35 + v26*0.50)
+      : Math.round(v24*0.30 + v25*0.70);
+  });
+
+  const wbAnnual = weightedBase.reduce((s,v)=>s+v, 0);
+
+  // ── YTD status (must be above scenarios so ytdPct is defined) ─────────────
+  const y25samePeriod = y25monthly.slice(0, y26months).reduce((s,v)=>s+v, 0);
+  const ytdVsWb = Math.round(weightedBase.slice(0, y26months).reduce((s,v)=>s+v, 0));
+  const ytdPct = y25samePeriod > 0 ? Math.round(y26ytd / y25samePeriod * 100) : 0;
+  const ytdVsWbPct = ytdVsWb > 0 ? Math.round(y26ytd / ytdVsWb * 100) : 0;
+  const y25vsY24Pct = y24total > 0 ? Math.round((y25total - y24total) / y24total * 100) : 0;
+
+  // ── Context strip cards ────────────────────────────────────────────────────
+  if ($('proj-y24')) {
+    $('proj-y24').textContent = '$' + y24total.toLocaleString();
+    $('proj-y24-sub').textContent = '12 months · $' + Math.round(y24total/12).toLocaleString() + '/mo avg';
+  }
+  if ($('proj-y25')) {
+    $('proj-y25').textContent = '$' + y25total.toLocaleString();
+    $('proj-y25-sub').textContent = (y25vsY24Pct >= 0 ? '+' : '') + y25vsY24Pct + '% vs 2024 · $' + Math.round(y25total/12).toLocaleString() + '/mo avg';
+  }
+  $('proj-ytd').textContent = '$' + y26ytd.toLocaleString();
+  $('proj-ytd-sub').textContent = ytdPct + '% of 2025 pace · ' + ytdVsWbPct + '% of wtd avg';
+  if ($('proj-wb')) {
+    $('proj-wb').textContent = '$' + Math.round(wbAnnual/12).toLocaleString() + '/mo';
+    $('proj-wb-sub').textContent = '$' + wbAnnual.toLocaleString() + '/yr blended avg';
+  }
+
+  // ── 3 Scenarios anchored to weighted base, not raw 2025 ───────────────────
+  const scenarios = [
+    { key:'cons', label:'Conservative', color:'#5a8090', mult:1.00,
+      desc:'Weighted avg pace',
+      detail:`Blends 2024 + 2025 + 2026 actuals. Realistic given YTD tracking ${ytdPct}% of 2025 pace.`,
+      annual: Math.round(y26ytd + MONTHS_LONG.slice(y26months).reduce((s,m,i) => s + weightedBase[y26months+i]*1.00, 0)) },
+    { key:'base', label:'Base',         color:'var(--b)', mult:1.10,
+      desc:'+10% over weighted avg',
+      detail:'Modest pickup in H2. Seasonal strength (Sep–Nov) has historically been your best stretch.',
+      annual: Math.round(y26ytd + MONTHS_LONG.slice(y26months).reduce((s,m,i) => s + weightedBase[y26months+i]*1.10, 0)) },
+    { key:'opt',  label:'Optimistic',   color:'var(--g)', mult:1.20,
+      desc:'+20% over weighted avg',
+      detail:`Would reach $${Math.round(wbAnnual*1.20).toLocaleString()} — requires consistent H2 performance across remaining months.`,
+      annual: Math.round(y26ytd + MONTHS_LONG.slice(y26months).reduce((s,m,i) => s + weightedBase[y26months+i]*1.20, 0)) },
+  ];
+
+  // ── Scenario cards ─────────────────────────────────────────────────────────
+  $('scenario-cards').innerHTML = scenarios.map(s => `
+    <div class="panel" style="border-color:${s.color}44">
+      <div style="padding:20px 22px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <div style="width:10px;height:10px;border-radius:2px;background:${s.color};box-shadow:0 0 8px ${s.color}88"></div>
+          <div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:${s.color}">${s.label}</div>
+        </div>
+        <div style="font-size:36px;font-weight:900;color:${s.color};line-height:1">${'$'+s.annual.toLocaleString()}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--dim);margin-top:4px">${s.desc} · ${'$'+Math.round(s.annual/12).toLocaleString()}/mo avg</div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--dim);line-height:1.5">${s.detail}</div>
+      </div>
+    </div>`).join('');
+
+  // ── Trajectory chart ───────────────────────────────────────────────────────
+  const allActual = [
+    ...MONTHS_LONG.map(m => ({ label: m.slice(0,3)+' 24', val: Math.round(byYM['2024_'+m]), year: '2024' })),
+    ...MONTHS_LONG.map(m => ({ label: m.slice(0,3)+' 25', val: Math.round(byYM['2025_'+m]), year: '2025' })),
+    ...MONTHS_LONG.slice(0, y26months).map(m => ({ label: m.slice(0,3)+' 26', val: Math.round(byYM['2026_'+m]), year: '2026' })),
+  ];
+  const remainingMons  = MONTHS_LONG.slice(y26months);
+  const remainingIdxs  = remainingMons.map((m,i) => y26months + i); // indices into weightedBase
+  const projStartIdx   = allActual.length - 1;
+
+  const W = ($('proj-line').clientWidth || 820);
+  const H = 280, padL=52, padR=24, padT=28, padB=36;
+  const chartW = W-padL-padR, chartH = H-padT-padB;
+  const totalPts = allActual.length + remainingMons.length;
+  const xS = i => padL + i * (chartW / (totalPts - 1));
+
+  const allVals = [
+    ...allActual.map(p => p.val),
+    ...remainingIdxs.flatMap(ri => scenarios.map(s => Math.round(weightedBase[ri] * s.mult)))
+  ];
+  const maxV = Math.max(...allVals, 1);
+  const yS   = v => padT + chartH - (Math.max(v, 0) / maxV) * chartH;
+
+  // Grid
+  const gridVals = [0, Math.round(maxV*0.25), Math.round(maxV*0.5), Math.round(maxV*0.75), maxV];
+  let ls = [`<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block;overflow:visible">`];
+  gridVals.forEach(v => {
+    const y = yS(v);
+    ls.push(`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1a2535" stroke-width="1"/>`);
+    ls.push(`<text x="${padL-6}" y="${y+3}" text-anchor="end" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${v>=1000?(Math.round(v/100)/10)+'k':'$'+v}</text>`);
+  });
+
+  // Year dividers
+  [12, 24].forEach(i => {
+    if (i < totalPts) {
+      ls.push(`<line x1="${xS(i)}" y1="${padT}" x2="${xS(i)}" y2="${padT+chartH}" stroke="#1a2535" stroke-width="1" stroke-dasharray="3,3"/>`);
+    }
+  });
+  ls.push(`<text x="${xS(6)}"  y="${padT-8}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#3a5060">2024</text>`);
+  ls.push(`<text x="${xS(18)}" y="${padT-8}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#3a5060">2025</text>`);
+  ls.push(`<text x="${xS(24+remainingMons.length/2)}" y="${padT-8}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" font-weight="800" fill="#3a6050">2026</text>`);
+
+  // Scenario projected lines
+  scenarios.forEach(s => {
+    const startPt = `${xS(projStartIdx)},${yS(allActual[projStartIdx].val)}`;
+    const projPts = remainingIdxs.map((ri,i) => `${xS(allActual.length+i)},${yS(Math.round(weightedBase[ri]*s.mult))}`);
+    ls.push(`<polyline points="${startPt} ${projPts.join(' ')}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>`);
+    if (projPts.length > 0) {
+      const last = projPts[projPts.length-1].split(',');
+      ls.push(`<circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${s.color}" opacity="0.7"/>`);
+    }
+  });
+
+  // Actual line — colored by year
+  const yearColors = {'2024':'#5a6080','2025':'#00d4ff','2026':'#00ff87'};
+  ['2024','2025','2026'].forEach(yr => {
+    const pts = allActual.filter(p=>p.year===yr);
+    if (pts.length < 2) return;
+    const indices = allActual.reduce((arr,p,i)=>{ if(p.year===yr) arr.push(i); return arr; },[]);
+    const polyPts = indices.map(i=>`${xS(i)},${yS(allActual[i].val)}`).join(' ');
+    ls.push(`<polyline points="${polyPts}" fill="none" stroke="${yearColors[yr]}" stroke-width="2.5" stroke-linejoin="round"/>`);
+    indices.forEach(i => {
+      ls.push(`<circle cx="${xS(i)}" cy="${yS(allActual[i].val)}" r="3.5" fill="${yearColors[yr]}" style="filter:drop-shadow(0 0 4px ${yearColors[yr]})"/>`);
+    });
+  });
+
+  // X axis labels — every 3 months
+  allActual.forEach((p, i) => {
+    if (i % 3 === 0) {
+      ls.push(`<text x="${xS(i)}" y="${H-8}" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" fill="#3a5060">${p.label.split(' ')[0]}</text>`);
+    }
+  });
+
+  ls.push('</svg>');
+  $('proj-line').innerHTML = ls.join('');
+
+  // Chart legend
+  $('proj-chart-legend').innerHTML = Object.entries(yearColors).map(([yr,col]) =>
+      `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:${col}"><svg width="14" height="3"><line x1="0" y1="1.5" x2="14" y2="1.5" stroke="${col}" stroke-width="2.5"/></svg>${yr}</div>`
+    ).join('') +
+    scenarios.map(s =>
+      `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:${s.color};opacity:.8"><svg width="14" height="3"><line x1="0" y1="1.5" x2="14" y2="1.5" stroke="${s.color}" stroke-width="2" stroke-dasharray="5,3"/></svg>${s.label}</div>`
+    ).join('');
+
+  // ── Milestones ─────────────────────────────────────────────────────────────
+  const milestones = [
+    { target: 500,  label: '$500/mo'  },
+    { target: 750,  label: '$750/mo'  },
+    { target: 1000, label: '$1,000/mo'},
+    { target: 1200, label: '$1,200/mo'},
+    { target: 1500, label: '$1,500/mo'},
+    { target: 2000, label: '$2,000/mo'},
+  ];
+
+  // Best projected monthly for each scenario (peak month in remaining year)
+  const scenarioPeakMonth = scenarios.map(s => ({
+    key: s.key, label: s.label, color: s.color,
+    peak: Math.max(...weightedBase.slice(y26months).map(v => Math.round(v * s.mult)))
+  }));
+
+  $('proj-milestones').innerHTML = milestones.map(ms => {
+    const hits24 = y24monthly.filter(v => v >= ms.target).length;
+    const hits25 = y25monthly.filter(v => v >= ms.target).length;
+    const hits26 = y26actual.filter((v,i) => v >= ms.target && i < y26months).length;
+
+    // Skip entirely if never hit in any year
+    if (hits24 + hits25 + hits26 === 0) return '';
+
+    const best26 = Math.max(...y26actual.slice(0, y26months));
+
+    // Which scenarios project hitting this milestone in any remaining month?
+    const reachable = scenarioPeakMonth.filter(s => s.peak >= ms.target);
+
+    // Progress bar: how close is the best 2026 month so far to this target?
+    const prog = Math.min(100, Math.round(best26 / ms.target * 100));
+
+    // Color: green if already hit in 2026, yellow if within reach on base, grey if unlikely
+    const alreadyHit = hits26 > 0;
+    const baseCanHit = reachable.some(s => s.key === 'base' || s.key === 'cons');
+    const col = alreadyHit ? '#00ff87' : baseCanHit ? '#ffe600' : reachable.length > 0 ? '#5a8090' : '#2a3540';
+    const textCol = alreadyHit ? '#00ff87' : baseCanHit ? '#ffe600' : reachable.length > 0 ? '#5a8090' : '#3a4550';
+
+    // Dot history rows — dots stretch full width
+    const dotRow = (vals, yr, dotCol) => vals.map((v,i) => {
+      const hit = v >= ms.target;
+      return `<div title="${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]} ${yr}: $${v.toLocaleString()}"
+        style="flex:1;height:12px;border-radius:3px;flex-shrink:0;
+               background:${hit ? dotCol : 'transparent'};
+               border:1px solid ${hit ? 'transparent' : 'rgba(255,255,255,.1)'};
+               box-shadow:${hit ? '0 0 5px '+dotCol+'88' : 'none'};
+               cursor:default"></div>`;
+    }).join('');
+
+    // Scenario badges
+    const badges = reachable.length === 0
+      ? `<span style="font-size:9px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--dim2);border-radius:4px;padding:2px 7px;font-weight:700">Out of range</span>`
+      : reachable.map(s =>
+          `<span style="font-size:9px;background:${s.color}18;border:1px solid ${s.color}44;color:${s.color};border-radius:4px;padding:2px 7px;font-weight:700">${s.label}</span>`
+        ).join(' ');
+
+    return `
+    <div style="padding:14px 0;border-bottom:1px solid rgba(26,37,53,.6)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap">
+        <div style="font-size:15px;font-weight:900;color:${textCol};font-family:'JetBrains Mono',monospace;min-width:90px">${ms.label}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${badges}</div>
+      </div>
+
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;font-weight:700;color:var(--dim2);width:28px;flex-shrink:0">2024</span>
+          <div style="display:flex;gap:3px;flex:1">${dotRow(y24monthly, '2024', '#5a7080')}</div>
+          <span style="font-size:9px;color:var(--dim2);white-space:nowrap;width:52px;text-align:right">${hits24}/12</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;font-weight:700;color:var(--dim2);width:28px;flex-shrink:0">2025</span>
+          <div style="display:flex;gap:3px;flex:1">${dotRow(y25monthly, '2025', '#00d4ff')}</div>
+          <span style="font-size:9px;color:var(--dim2);white-space:nowrap;width:52px;text-align:right">${hits25}/12</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;font-weight:700;color:${alreadyHit?'#00ff87':'var(--dim2)'};width:28px;flex-shrink:0">2026</span>
+          <div style="display:flex;gap:3px;flex:1">${dotRow(y26actual.slice(0,y26months).concat(Array(12-y26months).fill(0)), '2026', '#00ff87')}</div>
+          <span style="font-size:9px;color:${alreadyHit?'#00ff87':'var(--dim2)'};white-space:nowrap;width:52px;text-align:right">${hits26}/${y26months} so far</span>
+        </div>
+      </div>
+
+      <!-- 2026 best-month progress bar toward this target -->
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden">
+          <div style="height:100%;width:${prog}%;background:${col};border-radius:3px;transition:width .6s ease;box-shadow:${prog>=100?'0 0 6px '+col+'88':'none'}"></div>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:${textCol};white-space:nowrap;min-width:70px;text-align:right">
+          ${alreadyHit ? '✓ hit in 2026' : 'best ' + fmt(best26) + ' / ' + prog + '%'}
+        </span>
+      </div>
+    </div>`;
+  }).join('') + `<div style="margin-top:8px;font-size:9px;color:var(--dim2)">Hover dots for month detail · scenario badges show projected reachability in remaining 2026 months</div>`;
+
+  // ── Assumptions ────────────────────────────────────────────────────────────
+  const wbMonthlyAvg = Math.round(wbAnnual / 12);
+  $('proj-assumptions').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">Projection Basis</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">Weighted multi-year average: 2024 (30%) + 2025 (70%) for future months. Where 2026 actuals exist, those replace the blend at 50% weight. Automatically smooths as more years accumulate.</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">Weighted Avg Baseline</div>
+        <div style="font-size:26px;font-weight:900;color:var(--b)">${'$'+wbMonthlyAvg.toLocaleString()}<span style="font-size:12px;color:var(--dim)">/mo · $${wbAnnual.toLocaleString()}/yr</span></div>
+        <div style="font-size:11px;color:var(--dim);margin-top:4px">vs $${Math.round(y24total/12).toLocaleString()}/mo in 2024 · $${Math.round(y25total/12).toLocaleString()}/mo in 2025</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">2026 YTD vs Weighted Avg</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">Running at <strong style="color:${ytdVsWbPct>=100?'var(--g)':'var(--p)'}">${ytdVsWbPct}%</strong> of the weighted average Jan–Mar. ${ytdVsWbPct >= 100 ? 'Tracking ahead — conservative scenario within reach.' : 'Tracking below — H2 seasonal strength (Sep–Nov) historically recovers early-year shortfalls.'}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:4px">Why weighted avg beats YoY</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">2025's +115% growth was a one-time step-change. Projecting +15–30% off that again assumes the same expansion repeats. The weighted avg anchors to what you've actually averaged across both years.</div>
+      </div>
+    </div>`;
+
+  // ── Monthly table ──────────────────────────────────────────────────────────
+  $('proj-body').innerHTML = MONTHS_LONG.map((m, i) => {
+    const a25   = y25monthly[i];
+    const a26   = y26actual[i] || null;
+    const wb    = weightedBase[i];
+    const cons  = Math.round(wb * 1.00);
+    const base  = Math.round(wb * 1.10);
+    const opt   = Math.round(wb * 1.20);
+    const hasFull = a26 !== null && a26 > 0;
+    const statusColor = hasFull && a26 >= opt ? 'var(--g)' : hasFull && a26 >= base ? 'var(--b)' : hasFull && a26 >= cons ? 'var(--y)' : hasFull ? 'var(--p)' : 'var(--dim)';
+    const statusText  = hasFull && a26 >= opt ? '🟢 Optimistic' : hasFull && a26 >= base ? '🔵 Base' : hasFull && a26 >= cons ? '🟡 Conservative' : hasFull ? '🔴 Below target' : '—';
+    return `<tr>
+      <td><strong>${m.slice(0,3)}</strong></td>
+      <td class="r dim">${fmt(a25)}</td>
+      <td class="r" style="color:#5a8090">${fmt(cons)}</td>
+      <td class="r" style="color:var(--b)">${fmt(base)}</td>
+      <td class="r" style="color:var(--g)">${fmt(opt)}</td>
+      <td class="r" style="color:${hasFull?'var(--text)':'var(--dim2)'}">${hasFull ? fmt(a26) : '—'}</td>
+      <td style="font-size:10px;color:${statusColor}">${statusText}</td>
+    </tr>`;
+  }).join('');
+
+  const totCons = scenarios.find(s=>s.key==='cons').annual;
+  const totBase = scenarios.find(s=>s.key==='base').annual;
+  const totOpt  = scenarios.find(s=>s.key==='opt').annual;
+  $('proj-foot').innerHTML = `<tr style="background:rgba(0,255,135,.04);font-weight:900">
+    <td>Full Year</td>
+    <td class="r dim">${fmt(y25total)}</td>
+    <td class="r" style="color:#5a8090">${fmt(totCons)}</td>
+    <td class="r" style="color:var(--b)">${fmt(totBase)}</td>
+    <td class="r" style="color:var(--g)">${fmt(totOpt)}</td>
+    <td class="r pos">${y26ytd ? fmt(y26ytd) : '—'}</td>
+    <td></td>
+  </tr>`;
+}
+
+// ════════════════════════════════ NAVIGATION ════════════════════════════════
+const pageRendered = {};
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (!pageRendered[name]) {
+    pageRendered[name] = true;
+    if (name==='monthly')    renderMonthly();
+    if (name==='yearly')     renderYearly();
+    if (name==='tickers')    renderTickers();
+    if (name==='projection') renderProjection();
+  }
+}
+
+
+
+// ════════════════════════════════ HOUSE MONEY TAB ════════════════════════════════
+// ════════════════════════════════ SYNC FOOTER ════════════════════════════════
+function updateFooter(ts) {
+  var t = (typeof syncTimestamp !== 'undefined' && syncTimestamp) ? syncTimestamp : ts;
+  $('footer-sync').textContent = t ? 'Last synced: '+t : 'Local data';
+}
+
+// ════════════════════════════════ INIT ════════════════════════════════
+function dashInit() {
+  // Auto cache-bust: rewrite URL with current timestamp so browser always fetches fresh
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', Date.now());
+    window.history.replaceState(null, '', url.toString());
+  } catch(e) {}
+  try {
+    initYearFilters();
+    renderTrades();
+    pageRendered['trades'] = true;
+    updateFooter('');
+  } catch(e) {
+    const sub = document.getElementById('trades-sub');
+    if (sub) sub.textContent = 'JS ERROR: ' + e.message;
+    console.error('Dashboard init error:', e);
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', dashInit);
+} else {
+  dashInit();
+}
+
+// Re-render charts on resize (debounced) so SVGs recalculate at new width
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const active = document.querySelector('.page.active');
+    if (!active) return;
+    const name = active.id.replace('page-','');
+    if (name === 'trades')     { renderTradesWeekBars(); }
+    if (name === 'monthly')    { renderMonthly(); }
+    if (name === 'yearly')     { renderYearly(); }
+    if (name === 'tickers')    { renderTickers(); }
+    if (name === 'projection') { renderProjection(); }
+  }, 200);
+});
+</script>
+</body>
+</html>
