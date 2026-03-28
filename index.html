@@ -883,7 +883,7 @@ function setMonthlyYear(y, btn) {
 function renderMonthly() {
   const base = filterByYear(monthlyYear);
   const byMon = {}, tickerTotals = {}, byMonTickers = {};
-  MONTHS.forEach(m => { byMon[m] = {prem:0,profit:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0}; byMonTickers[m] = {}; });
+  MONTHS.forEach(m => { byMon[m] = {pm:0,pf:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0}; byMonTickers[m] = {}; });
   base.forEach(t => {
     const m = mon(t.op);
     if (!byMon[m]) return;
@@ -1078,7 +1078,7 @@ function renderYearly() {
 function renderTickers() {
   const byTicker = {};
   allsumTrades.forEach(t=>{
-    if(!byTicker[t.sk]) byTicker[t.sk]={prem:0,profit:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0,rets:[],cap:0};
+    if(!byTicker[t.sk]) byTicker[t.sk]={pm:0,pf:0,trades:0,puts:0,calls:0,expired:0,assigned:0,rolled:0,rets:[],cap:0};
     const d=byTicker[t.sk];
     d.pm+=t.pm; d.pf+=t.pf; d.trades++; d.cap+=t.cp;
     if(t.tp==='Put') d.puts++; else d.calls++;
@@ -1130,7 +1130,9 @@ function renderProjection() {
   MONTHS_LONG.forEach(m => { byYM['2024_'+m]=0; byYM['2025_'+m]=0; byYM['2026_'+m]=0; });
   allsumTrades.forEach(t => {
     
-    const longMon = t.op.split(' ')[0];
+    const shortMon = mon(t.op);
+    const moIdx = MONTHS.indexOf(shortMon);
+    const longMon = MONTHS_LONG[moIdx];
     const k = t.yr + '_' + longMon;
     if (byYM[k] !== undefined) byYM[k] += t.pf;
   });
@@ -1545,6 +1547,7 @@ function dashInit() {
   try {
     initYearFilters();
     renderTrades();
+    renderPositions();
     pageRendered['trades'] = true;
     updateFooter('');
   } catch(e) {
